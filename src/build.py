@@ -103,17 +103,72 @@ def waves(y, n=4):
     return out
 
 
-# full container: ship on water
-ship = '<path d="M64 188H412C430 188 444 180 454 166L438 224H80Z" fill="#0B2236" stroke="%s" stroke-opacity="0.85" stroke-linejoin="round"/>' % INK
-ship += '<path d="M80 224H438L432 236H86Z" fill="#B5502A" fill-opacity="0.9"/>'
-for r in range(3):
-    for c, k in enumerate(["k", "g", "o", "t", "k", "g"]):
-        if r == 2 and c in (1, 4): k = "k"
-        ship += cont(150 + c * 40 - (0), 188 - 10 * (r + 1), k if r else ["g", "k", "t", "o", "g", "k"][c])
-ship += '<rect x="84" y="146" width="54" height="42" fill="#0E2A40" stroke="%s" stroke-opacity="0.8"/><rect x="94" y="128" width="36" height="18" fill="#0E2A40" stroke="%s" stroke-opacity="0.8"/><rect x="104" y="108" width="14" height="20" fill="#0E2A40" stroke="%s" stroke-opacity="0.8"/><rect x="104" y="114" width="14" height="6" fill="#E8793A"/>' % (INK, INK, INK)
-ship += '<path d="M92 137H126M90 156H132M90 168H132" stroke="#F5B56B" stroke-opacity="0.75" stroke-width="2" stroke-dasharray="3 5"/>'
-art_fcl = plate('<path d="M0 224H480V300H0Z" fill="#0A2033"/><path d="M0 224H480" stroke="%s" stroke-opacity="0.35"/>' % INK + ship + waves(246))
-
+# full container: a quay crane lifting a 40 ft box onto a vessel
+fc = '<defs><radialGradient id="fcl-glow"><stop offset="0" stop-color="#F0803C" stop-opacity="0.38"/><stop offset="1" stop-color="#F0803C" stop-opacity="0"/></radialGradient>'
+fc += '<linearGradient id="fcl-fade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>'
+fc += '<mask id="fcl-rm" maskUnits="userSpaceOnUse" x="0" y="226" width="480" height="74"><rect x="0" y="226" width="480" height="74" fill="url(#fcl-fade)"/></mask></defs>'
+fc += '<path d="M0 226H480V300H0Z" fill="#0A2033"/>'
+WL = 226
+# the vessel: stern and bridge on the left, bow on the right
+hull = '<path d="M128 184H412C430 184 444 176 454 162L440 %d H142Z" fill="#0B2236" stroke="%s" stroke-opacity="0.85" stroke-linejoin="round"/>' % (WL, INK)
+hull += '<path d="M142 %d H440 L434 238 H148Z" fill="#B5502A" fill-opacity="0.9"/>' % WL
+hull += '<path d="M146 192H430" stroke="%s" stroke-opacity="0.18"/><path d="M150 204H424" stroke="%s" stroke-opacity="0.12"/>' % (INK, INK)
+stacks = ""
+heights = [3, 4, 3, 3, 4, 2]
+kinds = [["g", "k", "t"], ["k", "o", "g", "k"], ["t", "k", "g"], ["o", "k", "k"], ["k", "t", "o", "g"], ["g", "k"]]
+for ci in range(6):
+    for r in range(heights[ci]):
+        stacks += cont(196 + ci * 36, 184 - 14 * (r + 1), kinds[ci][r], 36, 14)
+bridge = '<rect x="134" y="150" width="46" height="34" fill="#0E2A40" stroke="%s" stroke-opacity="0.8"/><rect x="143" y="132" width="30" height="18" fill="#0E2A40" stroke="%s" stroke-opacity="0.8"/><rect x="150" y="112" width="14" height="20" fill="#0E2A40" stroke="%s" stroke-opacity="0.8"/><rect x="150" y="118" width="14" height="6" fill="#E8793A"/>' % (INK, INK, INK)
+bridge += '<path d="M140 141H166M138 160H176M138 172H176" stroke="#F5B56B" stroke-opacity="0.8" stroke-width="2" stroke-dasharray="3 5"/>'
+bridge += '<path d="M157 112V98" stroke="%s" stroke-opacity="0.7"/><circle cx="157" cy="97" r="1.8" fill="#FF5A4A"/>' % INK
+vessel = hull + stacks + bridge
+# mirror image in the water, fading with depth
+fc += '<g mask="url(#fcl-rm)" opacity="0.28"><g transform="translate(0 %d) scale(1 -1)">%s</g></g>' % (2 * WL, vessel)
+fc += waves(238, 4)
+fc += vessel
+# mooring lines to the quay
+fc += '<path d="M138 172C128 190 122 208 118 %d M136 180C130 196 126 210 122 %d" fill="none" stroke="%s" stroke-opacity="0.5"/>' % (WL, WL, INK)
+# quay with stacked boxes and the crane
+fc += '<path d="M0 %d H118 V300 H0Z" fill="#0C2539" stroke="%s" stroke-opacity="0.5"/>' % (WL, INK)
+fc += '<path d="M118 %d V300 M112 %d V300" stroke="%s" stroke-opacity="0.25"/>' % (WL, WL, INK)
+for qi, (qx, qk, qh) in enumerate([(4, "g", 2), (4 + 0, "k", 1)]):
+    pass
+fc += cont(6, WL - 14, "o", 36, 14) + cont(6, WL - 28, "k", 36, 14) + cont(46, WL - 14, "t", 36, 14) + cont(46, WL - 28, "g", 36, 14) + cont(86, WL - 14, "k", 30, 14)
+crane = '<g fill="none" stroke="%s" stroke-linejoin="round" stroke-width="1.2">' % INK
+crane += '<path d="M44 76L34 %d M104 76L114 %d" stroke-opacity="0.85"/>' % (WL, WL)
+crane += '<path d="M40 120L108 120M37 170L111 170" stroke-opacity="0.45"/><path d="M44 76L106 120M104 76L42 120M42 120L109 170M108 120L39 170" stroke-opacity="0.28"/>'
+crane += '<path d="M36 196H112" stroke-opacity="0.8"/>'
+# lattice boom: backreach to boom tip, two chords with a zig-zag between
+crane += '<path d="M30 68H352M30 76H352" stroke-opacity="0.85"/>'
+zz = "M30 76"
+x = 30
+up = False
+while x < 352:
+    x += 10
+    zz += "L%d %d" % (min(x, 352), 68 if not up else 76)
+    up = not up
+crane += '<path d="%s" stroke-opacity="0.4"/>' % zz
+crane += '<path d="M74 34L352 68M74 34L30 68" stroke-opacity="0.7"/><path d="M74 34V68" stroke-opacity="0.7"/>'
+crane += '<circle cx="74" cy="33" r="1.8" fill="#FF5A4A" stroke="none"/>'
+crane += '</g>'
+crane += '<rect x="56" y="50" width="36" height="18" fill="#0E2A40" stroke="%s" stroke-opacity="0.85"/><rect x="62" y="55" width="10" height="7" fill="#F5B56B" fill-opacity="0.85"/>' % INK
+# trolley, hoist cables and spreader over the lifted box
+crane += '<rect x="312" y="76" width="22" height="9" fill="#0E2A40" stroke="%s" stroke-opacity="0.9"/>' % INK
+crane += '<path d="M316 85L308 91M330 85L336 91" stroke="%s" stroke-opacity="0.8"/>' % INK
+crane += '<rect x="304" y="91" width="36" height="4" fill="#0E2A40" stroke="%s" stroke-opacity="0.9"/>' % INK
+fc += crane
+# the lifted box, with a glow and a callout
+fc += '<circle cx="322" cy="102" r="46" fill="url(#fcl-glow)"/>'
+fc += cont(304, 95, "o", 36, 14)
+for cxp, cyp in ((305, 96), (339, 96), (305, 108), (339, 108)):
+    fc += '<rect x="%.1f" y="%.1f" width="2.4" height="2.4" fill="#06131F" fill-opacity="0.8"/>' % (cxp - 1.4, cyp - 1.4)
+fc += '<path d="M302 102H278" stroke="#F4B08A" stroke-opacity="0.8"/><circle cx="302" cy="102" r="1.8" fill="#F4B08A"/>'
+fc += '<text x="274" y="105" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing="1.6" fill="#F4B08A" fill-opacity="0.95">40′ HC</text>'
+# where the box lands: dashed drop line and an empty slot above the third stack
+fc += '<path d="M322 111V%d" stroke="#F4B08A" stroke-opacity="0.45" stroke-dasharray="3 4"/>' % (184 - 14 * 3 - 14)
+fc += '<rect x="304.5" y="%d" width="35" height="13" fill="none" stroke="#F4B08A" stroke-opacity="0.6" stroke-dasharray="3 3"/>' % (184 - 14 * 3 - 14)
+art_fcl = plate(fc)
 
 # part load: open container with pallets from several shippers
 BOX = {"o": ("#C8602A", "#F4B08A"), "t": ("#1D6574", INK), "g": ("#58798F", INK), "k": ("#10304A", INK)}
@@ -178,6 +233,7 @@ rf += '<path d="M0 232H480" stroke="%s" stroke-opacity="0.0"/>' % INK
 art_reefer = plate(rf)
 
 out = tpl
+out = out.replace("{{LANDMASK}}", open(P + "geo-src/landmask.b64").read().strip())
 out = out.replace("{{HERO_SVG}}", hero).replace("{{FOOT_SVG}}", foot).replace("{{GRATICULE}}", graticule)
 out = out.replace("{{ART_FCL}}", art_fcl).replace("{{ART_LCL}}", art_lcl).replace("{{ART_REEFER}}", art_reefer)
 assert "{{" not in out, re.findall(r"\{\{[^}]+\}\}", out)

@@ -126,10 +126,6 @@ a{color:inherit;text-decoration:none}
 .step.is-active p{color:var(--ink-mid)}
 .globe{display:block;width:min(100%,72svh,560px);height:auto;margin-inline:auto;aspect-ratio:1}
 .globe-cap{margin-top:8px;text-align:center;font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-low)}
-.node circle{fill:var(--g1);stroke:rgba(207,227,238,.55);stroke-width:1.5;transition:fill 250ms var(--ease),stroke 250ms var(--ease)}
-.node text{font:500 10px var(--mono);letter-spacing:.14em;fill:var(--dim);transition:fill 250ms var(--ease)}
-.node.is-lit circle{fill:var(--accent);stroke:var(--accent-hi)}
-.node.is-lit text{fill:var(--ink-hi)}
 .story.is-static .step{color:var(--ink-hi)}
 .story.is-static .step-n{color:var(--accent)}
 .story.is-static .step p{color:var(--ink-mid)}
@@ -353,27 +349,8 @@ select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradie
       <div class="story-head"><h2 id="storyH">One container, followed from <em>port to port.</em></h2></div>
 
       <div class="story-globe">
-        <svg class="globe" id="globe" viewBox="0 0 520 520" role="img" aria-label="Example sea route across a globe with five stops: loading port, departure, at sea, discharge port and release">
-          <defs>
-            <radialGradient id="g-disc" cx="42%" cy="38%" r="75%"><stop offset="0" stop-color="#14405F"/><stop offset="1" stop-color="#06131F"/></radialGradient>
-            <radialGradient id="g-glow"><stop offset="0" stop-color="#F0803C" stop-opacity=".7"/><stop offset="1" stop-color="#F0803C" stop-opacity="0"/></radialGradient>
-          </defs>
-          <circle class="spin-g" cx="260" cy="260" r="246" fill="none" stroke="#CFE3EE" stroke-opacity=".35" stroke-dasharray="2 9"/>
-          <circle cx="260" cy="260" r="230" fill="url(#g-disc)" stroke="#CFE3EE" stroke-opacity=".6"/>
-          <g fill="none" stroke="#CFE3EE" stroke-opacity=".2">
-{{GRATICULE}}
-          </g>
-          <path d="M140 330C190 300 250 292 304 270C346 252 352 190 330 148" fill="none" stroke="#CFE3EE" stroke-opacity=".28" stroke-dasharray="3 6"/>
-          <path id="routeBase" d="M140 330C160 372 190 396 228 396C280 396 322 376 352 346C384 316 396 282 388 244C380 206 360 170 330 148" fill="none" stroke="#F0803C" stroke-opacity=".28" stroke-width="2" stroke-linecap="round"/>
-          <path id="route" d="M140 330C160 372 190 396 228 396C280 396 322 376 352 346C384 316 396 282 388 244C380 206 360 170 330 148" fill="none" stroke="#F0803C" stroke-width="2.6" stroke-linecap="round"/>
-          <g class="node is-lit" data-i="0"><circle cx="140" cy="330" r="6"/><text x="126" y="352" text-anchor="end">LOAD PORT</text></g>
-          <g class="node" data-i="1"><circle cx="228" cy="396" r="6"/><text x="228" y="422" text-anchor="middle">DEPARTS</text></g>
-          <g class="node" data-i="2"><circle cx="352" cy="346" r="6"/><text x="366" y="368">AT SEA</text></g>
-          <g class="node" data-i="3"><circle cx="388" cy="244" r="6"/><text x="402" y="248">DISCHARGE</text></g>
-          <g class="node" data-i="4"><circle cx="330" cy="148" r="6"/><text x="344" y="140">RELEASED</text></g>
-          <g id="marker" transform="translate(140 330)"><circle r="16" fill="url(#g-glow)"/><circle r="4.5" fill="#FFB27A"/></g>
-        </svg>
-        <p class="globe-cap">Example route. Not to scale.</p>
+        <canvas class="globe" id="globe" role="img" aria-label="Map of an example sea route from Lagos in West Africa, round the Cape of Good Hope, via Port Louis, to Nhava Sheva in India"></canvas>
+        <p class="globe-cap">Example sailing. Lagos to Nhava Sheva.</p>
       </div>
 
       <ol class="steps" id="steps">
@@ -678,21 +655,177 @@ select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradie
   });
 
   /* ---------- scroll: parallax, manifesto, pinned route ---------- */
-  var path = $('#route'), marker = $('#marker'), nodes = $$('.node'), steps = $$('.step'), story = $('#story');
-  var pathLen = path.getTotalLength();
+  /* ---------- globe: a real map, and one container sailing from West Africa to India ---------- */
+  var D2R = Math.PI / 180, TAU = Math.PI * 2;
+  var clamp01 = function (t) { return t < 0 ? 0 : t > 1 ? 1 : t; };
+  var smooth = function (t) { t = clamp01(t); return t * t * (3 - 2 * t); };
+  function llv(lat, lon) { var a = lat * D2R, b = lon * D2R, c = Math.cos(a); return [c * Math.cos(b), c * Math.sin(b), Math.sin(a)]; }
+
+  /* land: simplified country outlines, lon/lat in tenths of a degree */
+  var LAND = {{LANDRINGS}}.map(function (r) {
+    var out = [];
+    for (var i = 0; i < r.length; i += 2) out.push(llv(r[i + 1] / 10, r[i] / 10));
+    return out;
+  });
+  var GRAT = (function () {
+    var g = [], lat, lon, line;
+    for (lon = 0; lon < 360; lon += 20) { line = []; for (lat = -80; lat <= 80; lat += 4) line.push(llv(lat, lon)); g.push(line); }
+    for (lat = -60; lat <= 60; lat += 20) { line = []; for (lon = 0; lon <= 360; lon += 4) line.push(llv(lat, lon)); g.push(line); }
+    return g;
+  })();
+
+  /* the route: Lagos, round the Cape, Port Louis, Nhava Sheva */
+  var WP = [[6.45,3.36,'LAGOS',-1,-1],[4.5,3.2],[1,4.5],[-4,7.5],[-10,9.5],[-18,10],[-26,12],[-31,15],[-33.9,18.4,'CAPE TOWN',-1,1],
+            [-35.2,19.5],[-36,23],[-35,28],[-32.5,33],[-29,39],[-27,46],[-24.5,52],[-20.16,57.5,'PORT LOUIS',1,1],
+            [-15,60],[-8,63.5],[0,66.5],[8,69.5],[14,71.3],[18.95,72.95,'NHAVA SHEVA',1,-1]];
+  var ROUTE = (function () {
+    var pts = [], cum = [], stops = [], total = 0, prev = null;
+    WP.forEach(function (w) {
+      var v = llv(w[0], w[1]);
+      if (prev) {
+        var d = Math.acos(Math.max(-1, Math.min(1, prev[0] * v[0] + prev[1] * v[1] + prev[2] * v[2])));
+        var n = Math.max(1, Math.ceil(d / (1 * D2R)));
+        for (var k = 1; k <= n; k++) {
+          var t = k / n, A = Math.sin((1 - t) * d) / Math.sin(d), B = Math.sin(t * d) / Math.sin(d);
+          pts.push([A * prev[0] + B * v[0], A * prev[1] + B * v[1], A * prev[2] + B * v[2]]);
+          total += d / n; cum.push(total);
+        }
+      } else { pts.push(v); cum.push(0); }
+      if (w[2]) stops.push({ name: w[2], at: total, v: v, sx: w[3], sy: w[4] });
+      prev = v;
+    });
+    stops.forEach(function (s) { s.f = s.at / total; });
+    return { pts: pts, cum: cum.map(function (c) { return c / total; }), stops: stops };
+  })();
+  function routeAt(f) {
+    f = clamp01(f);
+    var c = ROUTE.cum, lo = 0, hi = c.length - 1;
+    while (hi - lo > 1) { var m = (lo + hi) >> 1; if (c[m] <= f) lo = m; else hi = m; }
+    var t = c[hi] === c[lo] ? 0 : (f - c[lo]) / (c[hi] - c[lo]), a = ROUTE.pts[lo], b = ROUTE.pts[hi];
+    var x = a[0] + (b[0] - a[0]) * t, y = a[1] + (b[1] - a[1]) * t, z = a[2] + (b[2] - a[2]) * t, n = Math.sqrt(x * x + y * y + z * z);
+    return { v: [x / n, y / n, z / n], i: lo };
+  }
+
+  var canvas = $('#globe'), gx = canvas.getContext ? canvas.getContext('2d') : null, last = null;
+  var steps = $$('.step'), story = $('#story');
+
+  function draw(st) {
+    last = st;
+    if (!gx) return;
+    var S = canvas.clientWidth; if (!S) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), px = Math.round(S * dpr);
+    if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+    var c = gx, cx = S / 2, cy = S / 2, R = S * 0.442;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, S, S);
+    var cb = Math.cos(st.lat * D2R), sb = Math.sin(st.lat * D2R), ca = Math.cos(st.lon * D2R), sa = Math.sin(st.lon * D2R);
+    function P(v) {
+      var x1 = v[0] * ca + v[1] * sa, y1 = -v[0] * sa + v[1] * ca;
+      return { d: x1 * cb + v[2] * sb, x: y1, y: -x1 * sb + v[2] * cb };
+    }
+    function scr(p) { return [cx + R * p.x, cy - R * p.y]; }
+    function limb(p) { var m = Math.sqrt(p.x * p.x + p.y * p.y) || 1; return [cx + R * p.x / m, cy - R * p.y / m]; }
+    function line(list, f0, f1) {
+      var pen = false;
+      for (var j = f0; j <= f1; j++) {
+        var p = P(list[j]);
+        if (p.d > 0) { var q = scr(p); if (pen) c.lineTo(q[0], q[1]); else { c.moveTo(q[0], q[1]); pen = true; } } else pen = false;
+      }
+    }
+
+    /* outer dotted ring, slowly turning (the same ring the old globe had) */
+    c.save(); c.translate(cx, cy); c.rotate(st.spin); c.setLineDash([2, 9]); c.lineWidth = 1; c.strokeStyle = 'rgba(207,227,238,.35)';
+    c.beginPath(); c.arc(0, 0, R * 1.07, 0, TAU); c.stroke(); c.restore();
+
+    /* ocean */
+    var og = c.createRadialGradient(cx - R * 0.3, cy - R * 0.36, R * 0.05, cx, cy, R);
+    og.addColorStop(0, '#15405E'); og.addColorStop(1, '#06131F');
+    c.fillStyle = og; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fill();
+
+    c.save(); c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.clip();
+    /* graticule */
+    c.lineWidth = 1; c.strokeStyle = 'rgba(207,227,238,.09)';
+    c.beginPath(); GRAT.forEach(function (g) { line(g, 0, g.length - 1); }); c.stroke();
+    /* land: polygons on the far side are pressed onto the rim so the fill stays whole */
+    c.beginPath();
+    LAND.forEach(function (ring) {
+      var any = false, k, p, q;
+      for (k = 0; k < ring.length; k++) if (P(ring[k]).d > 0) { any = true; break; }
+      if (!any) return;
+      for (k = 0; k < ring.length; k++) {
+        p = P(ring[k]); q = p.d > 0 ? scr(p) : limb(p);
+        if (k) c.lineTo(q[0], q[1]); else c.moveTo(q[0], q[1]);
+      }
+      c.closePath();
+    });
+    c.fillStyle = '#21506B'; c.fill();
+    c.lineJoin = 'round'; c.lineWidth = 0.8; c.strokeStyle = 'rgba(207,227,238,.42)'; c.stroke();
+    c.restore();
+
+    /* rim light */
+    var rg = c.createRadialGradient(cx, cy, R * 0.82, cx, cy, R);
+    rg.addColorStop(0, 'rgba(6,19,31,0)'); rg.addColorStop(1, 'rgba(6,19,31,.55)');
+    c.fillStyle = rg; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.fill();
+    c.lineWidth = 1; c.strokeStyle = 'rgba(207,227,238,.6)'; c.beginPath(); c.arc(cx, cy, R, 0, TAU); c.stroke();
+
+    /* the planned route, then the part already sailed */
+    var N = ROUTE.pts.length - 1, here = routeAt(st.s);
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.setLineDash([3, 6]); c.lineWidth = 1.4; c.strokeStyle = 'rgba(240,128,60,' + (0.55 * st.plan) + ')';
+    c.beginPath(); line(ROUTE.pts, 0, Math.round(N * st.plan)); c.stroke(); c.setLineDash([]);
+    if (st.s > 0) {
+      c.beginPath(); line(ROUTE.pts, 0, here.i); var hq = P(here.v); if (hq.d > 0) { var hs = scr(hq); c.lineTo(hs[0], hs[1]); }
+      c.strokeStyle = 'rgba(240,128,60,.35)'; c.lineWidth = 7; c.stroke();
+      c.strokeStyle = '#F0803C'; c.lineWidth = 2.6; c.stroke();
+    }
+
+    /* ports */
+    c.font = '500 10px "IBM Plex Mono", ui-monospace, monospace';
+    if ('letterSpacing' in c) c.letterSpacing = '1.4px';
+    ROUTE.stops.forEach(function (sp, n) {
+      var p = P(sp.v); if (p.d <= 0.02) return;
+      var q = scr(p), lit = st.s >= sp.f - 0.001 || (n === 0 && st.plan > 0.05);
+      c.beginPath(); c.arc(q[0], q[1], 5.5, 0, TAU);
+      c.fillStyle = lit ? '#F0803C' : '#0A1D2E'; c.fill();
+      c.lineWidth = 1.5; c.strokeStyle = lit ? '#FF9A5C' : 'rgba(207,227,238,.6)'; c.stroke();
+      c.textAlign = sp.sx < 0 ? 'right' : 'left';
+      var tx = q[0] + sp.sx * 11, ty = q[1] + (sp.sy < 0 ? -9 : 17);
+      c.lineWidth = 4; c.strokeStyle = 'rgba(6,19,31,.85)'; c.strokeText(sp.name, tx, ty);
+      c.fillStyle = lit ? '#EAF3F8' : 'rgba(207,227,238,.6)'; c.fillText(sp.name, tx, ty);
+    });
+
+    /* the container ship */
+    var sq = P(here.v);
+    if (sq.d > 0) {
+      var sxy = scr(sq), ah = scr(P(routeAt(Math.min(1, st.s + 0.01)).v)), bh = scr(P(routeAt(Math.max(0, st.s - 0.01)).v));
+      var gl = c.createRadialGradient(sxy[0], sxy[1], 0, sxy[0], sxy[1], 18);
+      gl.addColorStop(0, 'rgba(240,128,60,.7)'); gl.addColorStop(1, 'rgba(240,128,60,0)');
+      c.fillStyle = gl; c.beginPath(); c.arc(sxy[0], sxy[1], 18, 0, TAU); c.fill();
+      if (st.s > 0.002 && st.s < 0.998) {
+        c.save(); c.translate(sxy[0], sxy[1]); c.rotate(Math.atan2(ah[1] - bh[1], ah[0] - bh[0]));
+        c.fillStyle = '#FFB27A'; c.beginPath(); c.moveTo(9, 0); c.lineTo(-6, -5); c.lineTo(-3, 0); c.lineTo(-6, 5); c.closePath(); c.fill();
+        c.restore();
+      } else { c.fillStyle = '#FFB27A'; c.beginPath(); c.arc(sxy[0], sxy[1], 4.5, 0, TAU); c.fill(); }
+    }
+  }
+
+  /* one scroll position becomes one picture: plan the route, then sail it */
+  function stateAt(p) {
+    var s = smooth((p - 0.3) / 0.62);
+    return { plan: clamp01(p / 0.22), s: s, lat: -8 + 6 * s, lon: 22 + 34 * s, spin: p * 2 };
+  }
   function setRoute(p) {
-    var pt = path.getPointAtLength(Math.max(0.001, p * pathLen));
-    marker.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ')');
-    nodes.forEach(function (n, i) { n.classList.toggle('is-lit', p >= i / 4 - 0.01); });
+    draw(stateAt(p));
     var idx = Math.min(steps.length - 1, Math.floor(p * steps.length));
     steps.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
   }
   function staticStory() {
     story.classList.add('is-static');
-    marker.setAttribute('transform', 'translate(330 148)');
-    nodes.forEach(function (n) { n.classList.add('is-lit'); });
     steps.forEach(function (s) { s.classList.remove('is-active'); });
+    draw({ plan: 1, s: 1, lat: -8, lon: 39, spin: 0 });
   }
+  if ('ResizeObserver' in window) new ResizeObserver(function () { if (last) draw(last); }).observe(canvas);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (last) draw(last); });
+  setRoute(0);
 
   var manifesto = $('#manifesto'), mWords = splitWords(manifesto, 'w');
 
@@ -720,7 +853,6 @@ select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradie
 
       /* route story: pin the section and draw the route with the scroll */
       story.classList.remove('is-static');
-      gsap.set(path, { strokeDasharray: pathLen, strokeDashoffset: pathLen });
       setRoute(0);
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -729,8 +861,7 @@ select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradie
         },
         onUpdate: function () { setRoute(tl.progress()); }
       });
-      tl.to(path, { strokeDashoffset: 0, ease: 'none', duration: 1 });
-      return function () { gsap.set(path, { clearProps: 'strokeDasharray,strokeDashoffset' }); };
+      tl.to({}, { duration: 1, ease: 'none' });
     });
 
     mm.add('(prefers-reduced-motion: reduce)', function () {

@@ -178,6 +178,7 @@ rf += '<path d="M0 232H480" stroke="%s" stroke-opacity="0.0"/>' % INK
 art_reefer = plate(rf)
 
 out = tpl
+out = out.replace("{{LANDRINGS}}", open(P + "geo-src/rings.json").read())
 out = out.replace("{{HERO_SVG}}", hero).replace("{{FOOT_SVG}}", foot).replace("{{GRATICULE}}", graticule)
 out = out.replace("{{ART_FCL}}", art_fcl).replace("{{ART_LCL}}", art_lcl).replace("{{ART_REEFER}}", art_reefer)
 assert "{{" not in out, re.findall(r"\{\{[^}]+\}\}", out)

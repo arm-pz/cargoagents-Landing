@@ -1,0 +1,1118 @@
+<title>Cargo Agents</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+/* Layout concept: one night sky over a working harbour. The page scrolls from an astrolabe at the horizon down to the quay.
+   Dark single look by choice: navy grounds, engraved pale-blue line art, one orange accent. */
+:root{
+  color-scheme:dark;
+  --g0:#050F19; --g1:#0A1D2E; --g2:#10293E; --g3:#07131F;
+  --ink:#CFE3EE; --ink-hi:#EAF3F8; --ink-mid:#A9C0CF; --ink-low:#8FB0C4; --dim:#5F7C90; --dim-acc:#A8683F;
+  --line:rgba(207,227,238,.16); --line-strong:rgba(207,227,238,.34);
+  --accent:#F0803C; --accent-hi:#FF9A5C; --accent-ink:#08182A; --teal:#1D6574; --lamp:#F5B56B; --ok:#6FD0B4;
+  --surface:rgba(207,227,238,.045); --surface-hi:rgba(207,227,238,.09);
+  --ring:0 0 0 1px rgba(255,255,255,.08); --ring-hi:0 0 0 1px rgba(255,255,255,.16);
+  --display:'Instrument Serif','Times New Roman',Georgia,serif;
+  --body:'Inter Tight',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+  --ease:cubic-bezier(0.22,1,0.36,1); --ease-icon:cubic-bezier(0.2,0,0,1);
+  --gutter:clamp(16px,4vw,40px);
+  --stream-gap:45ms; --stream-fade:350ms; --stream-blur:1px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--g3);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--g3);color:var(--ink-mid);font:400 16px/1.6 var(--body);overflow-x:clip}
+img,svg{max-width:100%}
+h1,h2,h3{margin:0;font-family:var(--display);font-weight:400;color:var(--ink-hi);text-wrap:balance;letter-spacing:-.015em}
+p{margin:0;text-wrap:pretty}
+em{font-style:italic;color:var(--accent)}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+::selection{background:rgba(240,128,60,.35);color:var(--ink-hi)}
+.wrap{width:100%;max-width:1240px;margin-inline:auto;padding-left:max(var(--gutter),env(safe-area-inset-left,0px));padding-right:max(var(--gutter),env(safe-area-inset-right,0px))}
+.label{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-low)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:0 22px 0 26px;border:0;border-radius:999px;font:600 15px/1 var(--body);cursor:pointer;
+  transition-property:background-color,color,box-shadow,scale;transition-duration:150ms;transition-timing-function:ease-out;-webkit-tap-highlight-color:transparent}
+.btn:active{scale:.96}
+.btn svg{width:16px;height:16px;flex:none}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{background:var(--accent-hi)}
+.btn-ghost{background:transparent;color:var(--ink-hi);padding:0 26px;box-shadow:0 0 0 1px rgba(207,227,238,.4)}
+.btn-ghost:hover{box-shadow:0 0 0 1px var(--ink);background:rgba(207,227,238,.06)}
+.btn-sm{min-height:44px;padding:0 20px;font-size:14px}
+.btn-text{background:none;border:0;color:var(--ink-mid);font:500 14px/1 var(--body);min-height:44px;padding:0 8px;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(207,227,238,.3);text-underline-offset:4px;transition:color 150ms ease-out}
+.btn-text:hover{color:var(--ink-hi)}
+
+/* hero */
+.hero{position:relative;isolation:isolate;overflow:hidden;width:100%;min-height:1100px;aspect-ratio:1440/1100;background:radial-gradient(ellipse at 50% 58%,#13344D 0%,#0A1D2E 42%,#050F19 100%)}
+.hero-sky{position:absolute;inset:0;z-index:0;pointer-events:none}
+.hero-sky svg{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:none}
+.hero-vig{position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 50% 55%,rgba(2,7,12,0) 52%,rgba(2,7,12,.65) 100%)}
+.hero-fade{position:absolute;left:0;right:0;bottom:0;height:240px;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(7,19,31,0) 0%,var(--g3) 100%)}
+.nav{position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:16px 32px;padding-top:28px}
+.brand{display:inline-flex;align-items:center;gap:12px;color:var(--ink-hi);min-height:44px}
+.brand span{font:400 30px/1 var(--display)}
+.nav-links{display:flex;gap:6px 32px;font:500 15px/1 var(--body)}
+.nav-links a{display:inline-flex;align-items:center;min-height:44px;color:var(--ink-hi);transition:color 150ms ease-out}
+.nav-links a:hover{color:var(--accent-hi)}
+.hero-copy{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;margin-top:clamp(96px,10.8vw,156px)}
+.hero-copy::before{content:"";position:absolute;z-index:-1;left:50%;top:-70px;width:min(1100px,130%);height:660px;transform:translateX(-50%);pointer-events:none;background:radial-gradient(closest-side,rgba(4,12,20,.84),rgba(4,12,20,0))}
+.hero h1{font-size:clamp(46px,6.3vw,92px);line-height:.98;max-width:11em}
+.hero-sub{margin-top:24px;max-width:34em;font-size:clamp(16px,1.35vw,19px);line-height:1.6;color:var(--ink-mid);text-wrap:balance}
+.hero-cta{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:32px}
+.hero-foot{position:absolute;left:0;right:0;bottom:0;z-index:3;padding-bottom:max(26px,env(safe-area-inset-bottom,0px))}
+.hero-foot .wrap>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;border-top:1px solid var(--line);padding-top:16px;font:400 12px/1.5 var(--mono);letter-spacing:.06em;color:var(--ink-low)}
+.rise{animation:rise .9s var(--ease) both}
+
+/* hero svg motion */
+.spin{transform-box:view-box;transform-origin:720px 640px}
+.spinA{animation:spin 260s linear infinite}
+.spinB{animation:spin 220s linear infinite reverse}
+.spinC{animation:spin 150s linear infinite}
+.flow{animation:flow 1.4s linear infinite}
+.stars-a{animation:twinkle 5s ease-in-out infinite}
+.stars-b{animation:twinkle 7s ease-in-out -2.5s infinite}
+.pulse{animation:pulse 4s ease-in-out infinite}
+.wv{animation:drift 70s linear infinite}
+.wv2{animation:drift 95s linear infinite reverse}
+.ship{animation:sail 26s ease-in-out infinite}
+.fship{animation:bob 8s ease-in-out infinite}
+.gull{animation:glide 16s ease-in-out infinite}
+.bl{animation:blink 2.6s ease-in-out infinite}
+.puff{transform-box:fill-box;transform-origin:center;animation:puff 6s ease-out infinite}
+.spin-g{transform-box:fill-box;transform-origin:center;animation:spin 140s linear infinite}
+@keyframes drift{to{stroke-dashoffset:calc(var(--len) * -1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes flow{to{stroke-dashoffset:-14}}
+@keyframes sail{0%{transform:translate(-7px,0)}50%{transform:translate(7px,-1.5px)}100%{transform:translate(-7px,0)}}
+@keyframes bob{0%{transform:translateY(0)}50%{transform:translateY(-1.5px)}100%{transform:translateY(0)}}
+@keyframes glide{0%{transform:translateX(0)}50%{transform:translateX(34px)}100%{transform:translateX(0)}}
+@keyframes blink{0%{opacity:1}55%{opacity:1}62%{opacity:.12}100%{opacity:.12}}
+@keyframes rise{from{opacity:0;transform:translateY(14px);filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes twinkle{0%{opacity:.3}50%{opacity:.95}100%{opacity:.3}}
+@keyframes pulse{0%{opacity:.6}50%{opacity:1}100%{opacity:.6}}
+@keyframes puff{0%{transform:translate(0,0) scale(.5);opacity:.6}100%{transform:translate(-30px,-44px) scale(2.4);opacity:0}}
+@keyframes shim{from{background-position:200% 0}to{background-position:-200% 0}}
+@keyframes shake{0%,100%{translate:0 0}20%{translate:-6px 0}45%{translate:5px 0}70%{translate:-3px 0}88%{translate:2px 0}}
+
+/* manifesto */
+.manifesto{padding-block:clamp(40px,6vw,88px) clamp(64px,9vw,140px)}
+.manifesto p{font:400 clamp(28px,4.7vw,66px)/1.1 var(--display);letter-spacing:-.018em;color:var(--ink-hi);max-width:19em;text-wrap:balance}
+.manifesto .w{color:var(--dim)}
+.manifesto em .w{color:var(--dim-acc)}
+.manifesto-meta{display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:40px;padding-top:20px;border-top:1px solid var(--line)}
+
+/* story */
+.story{position:relative;background:linear-gradient(180deg,var(--g3) 0%,#091A29 50%,var(--g3) 100%)}
+.story-pin{min-height:100svh;display:flex;align-items:center;padding-block:clamp(40px,6vh,72px)}
+.story-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);grid-template-areas:"head globe" "steps globe";column-gap:clamp(32px,6vw,96px);row-gap:28px;align-content:center;align-items:start}
+.story-head{grid-area:head}
+.story-head h2{font-size:clamp(34px,4.2vw,58px);line-height:1.02}
+.story-globe{grid-area:globe;align-self:center}
+.steps{grid-area:steps;list-style:none;margin:0;padding:0}
+.step{display:grid;grid-template-columns:40px minmax(0,1fr);padding:14px 0;border-top:1px solid var(--line);color:var(--dim);transition:color 250ms var(--ease)}
+.step:last-child{border-bottom:1px solid var(--line)}
+.step-n{font:500 12px/28px var(--mono);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.step h3{font-size:26px;line-height:28px;color:inherit;letter-spacing:-.01em}
+.step-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows 250ms var(--ease)}
+.step-body>div{overflow:hidden;min-height:0}
+.step p{margin-top:6px;font-size:15px;line-height:1.5;color:inherit;max-width:34em}
+.step.is-active{color:var(--ink-hi)}
+.step.is-active .step-n{color:var(--accent)}
+.step.is-active p{color:var(--ink-mid)}
+.globe{display:block;width:min(100%,72svh,560px);height:auto;margin-inline:auto;aspect-ratio:1}
+.globe-cap{margin-top:8px;text-align:center;font:400 11px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-low)}
+.node circle{fill:var(--g1);stroke:rgba(207,227,238,.55);stroke-width:1.5;transition:fill 250ms var(--ease),stroke 250ms var(--ease)}
+.node text{font:500 10px var(--mono);letter-spacing:.14em;fill:var(--dim);transition:fill 250ms var(--ease)}
+.node.is-lit circle{fill:var(--accent);stroke:var(--accent-hi)}
+.node.is-lit text{fill:var(--ink-hi)}
+.story.is-static .step{color:var(--ink-hi)}
+.story.is-static .step-n{color:var(--accent)}
+.story.is-static .step p{color:var(--ink-mid)}
+.story.is-static .step-body{grid-template-rows:1fr}
+
+/* agent console */
+.console{padding-block:clamp(72px,10vw,150px)}
+.console-grid{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(32px,6vw,88px);align-items:center}
+.console h2{font-size:clamp(34px,4.2vw,58px);line-height:1.02}
+.console-copy p{margin-top:20px;max-width:30em}
+.console-copy .btn{margin-top:28px}
+.term{margin:0;padding:8px;border-radius:24px;background:rgba(207,227,238,.05);box-shadow:var(--ring),0 30px 70px -30px rgba(0,0,0,.7)}
+.term-in{border-radius:16px;background:linear-gradient(180deg,#0A2033 0%,#08182A 100%);overflow:hidden}
+.term-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.term-bar .dots{display:flex;gap:6px}
+.term-bar .dots i{width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(207,227,238,.4)}
+.term-bar .dots i:first-child{background:var(--accent);box-shadow:none}
+.term-bar .label{flex:1;text-align:left}
+.log{list-style:none;margin:0;padding:22px 20px 8px;display:grid;gap:16px;font:400 14px/1.5 var(--mono);min-height:330px;align-content:start}
+.log li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;align-items:start;color:var(--ink-mid)}
+.st{position:relative;display:block;width:20px;height:21px}
+.st svg{position:absolute;inset:0;width:20px;height:20px;transition-property:opacity,scale,filter;transition-duration:300ms;transition-timing-function:var(--ease-icon)}
+.st .ic-done{opacity:0;scale:.25;filter:blur(4px);color:var(--ok)}
+.st .ic-pend{opacity:1;scale:1;filter:blur(0);color:var(--ink-low)}
+.log li.is-done .ic-done{opacity:1;scale:1;filter:blur(0)}
+.log li.is-done .ic-pend{opacity:0;scale:.25;filter:blur(4px)}
+.w-i{opacity:0;filter:blur(var(--stream-blur));transition:opacity var(--stream-fade) var(--ease),filter var(--stream-fade) var(--ease)}
+.w-i.is-in{opacity:1;filter:blur(0)}
+.log li.is-wait .tx{background:linear-gradient(90deg,var(--ink-low) 0%,var(--ink-hi) 50%,var(--ink-low) 100%);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shim 2.4s linear infinite}
+.log li.is-done .tx{color:var(--ink-hi)}
+.decide{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;padding:14px 20px 22px 52px;opacity:0;visibility:hidden;translate:0 8px;transition:opacity 250ms ease-in-out,translate 250ms var(--ease),visibility 0s linear 250ms}
+.decide.is-on{opacity:1;visibility:visible;translate:0 0;transition-delay:0s}
+.decide span{font:400 13px/1 var(--mono);color:var(--ink-low);margin-right:4px}
+.chip{min-height:44px;padding:0 18px;border:0;border-radius:999px;background:var(--surface-hi);color:var(--ink-hi);font:500 14px/1 var(--body);cursor:pointer;box-shadow:var(--ring);transition-property:background-color,box-shadow,scale;transition-duration:150ms;transition-timing-function:ease-out}
+.chip:hover{background:rgba(240,128,60,.18);box-shadow:0 0 0 1px rgba(240,128,60,.6)}
+.chip:active{scale:.96}
+
+/* modes */
+.modes{padding-block:clamp(64px,9vw,140px)}
+.modes-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:28px 40px;margin-bottom:clamp(28px,4vw,48px)}
+.modes-head h2{font-size:clamp(34px,4.2vw,58px);line-height:1.02;max-width:12em}
+.tabs{position:relative;display:inline-flex;align-items:center;gap:3px;padding:3px;border-radius:999px;background:var(--surface);box-shadow:var(--ring);max-width:100%}
+.tab{position:relative;z-index:1;appearance:none;border:0;background:transparent;min-height:44px;padding:0 20px;border-radius:999px;color:var(--ink-low);font:500 15px/1 var(--body);cursor:pointer;transition:color 250ms var(--ease)}
+.tab:hover,.tab[aria-selected="true"]{color:var(--ink-hi)}
+.tabs-pill{position:absolute;z-index:0;top:3px;left:0;height:44px;width:0;border-radius:999px;background:rgba(207,227,238,.14);transform:translateX(0);transition:transform 250ms var(--ease),width 250ms var(--ease);will-change:transform,width;pointer-events:none}
+.panels{display:grid}
+.panel{grid-area:1/1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:clamp(24px,5vw,72px);align-items:center;opacity:0;visibility:hidden;translate:0 8px;filter:blur(2px);transition:opacity 150ms ease-in-out,translate 150ms var(--ease),filter 150ms ease-in-out,visibility 0s linear 150ms;pointer-events:none}
+.panel.is-on{opacity:1;visibility:visible;translate:0 0;filter:blur(0);transition:opacity 250ms ease-in-out 80ms,translate 250ms var(--ease) 80ms,filter 250ms ease-in-out 80ms,visibility 0s;pointer-events:auto}
+.panel h3{font-size:clamp(30px,3.4vw,46px);line-height:1.05}
+.panel p{margin-top:16px;max-width:30em}
+.watch{margin:28px 0 0;padding:0}
+.watch div{display:grid;grid-template-columns:104px minmax(0,1fr);gap:4px 20px;padding:14px 0;border-top:1px solid var(--line)}
+.watch div:last-child{border-bottom:1px solid var(--line)}
+.watch dt{font:500 12px/1.7 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.watch dd{margin:0;font-size:15px;line-height:1.5;color:var(--ink-mid)}
+.plate{position:relative;border-radius:24px;aspect-ratio:48/30;background:radial-gradient(ellipse at 50% 70%,#13344D 0%,#0A1D2E 55%,#07131F 100%);box-shadow:var(--ring);overflow:hidden}
+.plate svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+/* quote */
+.quote{position:relative;padding-block:clamp(72px,10vw,150px) clamp(40px,6vw,90px)}
+.quote-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(32px,6vw,88px);align-items:start}
+.quote h2{font-size:clamp(38px,5vw,72px);line-height:1}
+.quote-copy p{margin-top:20px;max-width:26em}
+.quote-copy .addr{display:inline-block;margin-top:28px;font:500 14px/1.4 var(--mono);color:var(--ink-hi);user-select:all;padding:10px 0;border-bottom:1px solid var(--line-strong)}
+.card{border-radius:28px;padding:clamp(20px,3vw,36px);background:var(--surface);box-shadow:var(--ring),0 40px 80px -40px rgba(0,0,0,.7)}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 16px}
+.fld{display:flex;flex-direction:column;gap:8px;min-width:0}
+.fld.full{grid-column:1/-1}
+.fld>label{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-low)}
+.in{width:100%;min-height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line-strong);background:rgba(5,15,25,.55);color:var(--ink-hi);font:400 16px/1.2 var(--body);transition:border-color 150ms ease-out,background-color 150ms ease-out}
+textarea.in{padding:12px 14px;min-height:96px;line-height:1.5;resize:vertical}
+select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--ink-low) 50%),linear-gradient(135deg,var(--ink-low) 50%,transparent 50%);background-position:calc(100% - 20px) 21px,calc(100% - 14px) 21px;background-size:6px 6px;background-repeat:no-repeat;padding-right:36px}
+.in::placeholder{color:#6F8CA0}
+.in:hover{border-color:rgba(207,227,238,.5)}
+.in:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.fld.is-error .in{border-color:#FF8B7A}
+.fld.is-shaking .in{animation:shake .4s var(--ease)}
+.err{min-height:0;font:400 13px/1.3 var(--mono);color:#FF9E8F;display:none}
+.fld.is-error .err{display:block}
+.form-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px;margin-top:24px}
+.form-foot p{font-size:13px;line-height:1.5;color:var(--ink-low);max-width:26em}
+.sent{display:grid;gap:18px}
+.sent[hidden]{display:none!important}
+.check{display:inline-block;opacity:0;transform-origin:center;width:56px;height:56px}
+.check svg{display:block;overflow:visible}
+.check svg path.cp{stroke-dasharray:30;stroke-dashoffset:30}
+.check[data-state="in"]{animation:ck-fade 500ms var(--ease) forwards,ck-rot 500ms var(--ease) forwards,ck-blur 500ms var(--ease) forwards,ck-bob 500ms cubic-bezier(.34,1.35,.64,1) forwards}
+.check[data-state="in"] svg path.cp{animation:ck-draw 500ms var(--ease) 80ms forwards}
+@keyframes ck-fade{from{opacity:0}to{opacity:1}}
+@keyframes ck-rot{from{transform:rotate(80deg)}to{transform:rotate(0)}}
+@keyframes ck-blur{from{filter:blur(10px)}to{filter:blur(0)}}
+@keyframes ck-bob{from{translate:0 24px}to{translate:0 0}}
+@keyframes ck-draw{to{stroke-dashoffset:0}}
+.sent h3{font-size:clamp(28px,3vw,38px);line-height:1.05}
+.sent p{max-width:32em}
+.sent strong{color:var(--ink-hi);font-weight:500;user-select:all}
+.draft{width:100%;min-height:190px;border-radius:12px;border:1px solid var(--line-strong);background:rgba(5,15,25,.6);color:var(--ink-mid);font:400 13px/1.6 var(--mono);padding:14px;resize:vertical}
+.sent-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
+.copy-lab{display:inline-grid}
+.copy-lab>span{grid-area:1/1;transition:opacity 150ms ease-in-out,filter 150ms ease-in-out,translate 150ms var(--ease)}
+.copy-lab>.b{opacity:0;filter:blur(2px);translate:0 4px}
+.is-copied .copy-lab>.a{opacity:0;filter:blur(2px);translate:0 -4px}
+.is-copied .copy-lab>.b{opacity:1;filter:blur(0);translate:0 0}
+
+/* footer */
+.foot{position:relative;background:var(--g3)}
+.foot-cols{display:flex;flex-wrap:wrap;gap:40px 24px;padding-top:clamp(40px,6vw,80px);padding-bottom:48px}
+.foot-brand{flex:1.4 1 280px;min-width:0}
+.foot-brand p{margin-top:16px;max-width:22em;font-size:15px}
+.foot-addr{margin-top:16px;font:400 13px/1.8 var(--mono);color:var(--ink-low)}
+.foot-addr a{color:var(--ink-mid);text-decoration:underline;text-decoration-color:rgba(207,227,238,.3);text-underline-offset:4px}
+.foot-col{flex:1 1 130px;min-width:120px}
+.foot-col h3{margin:0 0 18px;font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-low)}
+.foot-col ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:15px}
+.foot-col a{display:inline-flex;align-items:center;min-height:36px;color:var(--ink-hi);transition:color 150ms ease-out}
+.foot-col a:hover{color:var(--accent-hi)}
+.foot-scene{position:relative;width:100%;aspect-ratio:1440/460;min-height:480px;overflow:hidden}
+.foot-scene>svg{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:none}
+.foot-scene::after{content:"";position:absolute;left:0;right:0;bottom:0;height:160px;background:linear-gradient(180deg,rgba(7,19,31,0) 0%,rgba(7,19,31,.92) 72%);pointer-events:none}
+.legal{position:absolute;left:0;right:0;bottom:0;z-index:2;padding-bottom:max(26px,env(safe-area-inset-bottom,0px))}
+.legal .wrap>div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 32px;border-top:1px solid var(--line);padding-top:18px;font:400 12px/1.5 var(--mono);letter-spacing:.02em;color:var(--ink-low)}
+.legal nav{display:flex;flex-wrap:wrap;gap:8px 24px}
+.legal a{display:inline-flex;align-items:center;min-height:32px;color:var(--ink-low);transition:color 150ms ease-out}
+.legal a:hover{color:var(--ink-hi)}
+
+/* narrow screens */
+@media (max-width:860px){
+  .nav-links{display:none}
+  .story-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"head" "globe" "steps";row-gap:16px}
+  .story-head h2{font-size:clamp(30px,8vw,40px)}
+  .globe{width:min(100%,38svh,340px)}
+  .globe-cap{display:none}
+  .step{padding:10px 0}
+  .step h3{font-size:22px}
+  .step-body{grid-template-rows:0fr}
+  .step.is-active .step-body,.story.is-static .step-body{grid-template-rows:1fr}
+  .console-grid,.quote-grid,.panel{grid-template-columns:minmax(0,1fr)}
+  .panel{gap:24px}
+  .log{min-height:360px}
+  .decide{padding-left:20px}
+}
+@media (max-width:560px){
+  .fields{grid-template-columns:minmax(0,1fr)}
+  .watch div{grid-template-columns:minmax(0,1fr)}
+  .tabs{display:flex;width:100%}
+  .tab{flex:1 1 0;padding:0 8px}
+  .hero h1{font-size:clamp(44px,13vw,60px)}
+  .hero-foot .wrap>div span:last-child{display:none}
+  .brand{gap:10px}
+  .brand span{font-size:24px;white-space:nowrap}
+  .nav .btn-sm{padding:0 16px;font-size:13px;white-space:nowrap}
+}
+@media (max-width:860px){
+  .foot-scene{aspect-ratio:auto;min-height:0;height:430px}
+  .foot-scene>svg{inset:0 0 auto 0;height:calc(100% - 150px)}
+  .foot-scene::after{bottom:150px;height:130px;background:linear-gradient(180deg,rgba(7,19,31,0) 0%,rgba(7,19,31,1) 100%)}
+}
+@media (prefers-reduced-motion:reduce){
+  .rise,.spinA,.spinB,.spinC,.spin-g,.flow,.stars-a,.stars-b,.pulse,.wv,.wv2,.ship,.fship,.gull,.bl,.puff{animation:none}
+  .log li.is-wait .tx{animation:none;background:none;-webkit-text-fill-color:currentColor;color:var(--ink-hi)}
+  .w-i{transition:none;opacity:1;filter:none}
+  .tabs-pill,.tab,.panel,.step,.step-body,.decide,.st svg{transition:none}
+  .fld.is-shaking .in{animation:none}
+  .check{animation:none!important;opacity:1}
+  .check svg path.cp{animation:none!important;stroke-dashoffset:0}
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pend" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.4 2.6"/></symbol>
+    <symbol id="i-done" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.25" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M6.6 10.2l2.2 2.2 4.6-4.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-mark" viewBox="0 0 40 40"><rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9" fill="none" stroke="#CFE3EE" stroke-opacity="0.5" stroke-width="1.5"/><rect x="9" y="10" width="10" height="6" fill="none" stroke="#CFE3EE" stroke-width="1.5"/><rect x="21" y="10" width="10" height="6" fill="#F0803C"/><rect x="9" y="18" width="6" height="6" fill="none" stroke="#CFE3EE" stroke-width="1.5"/><rect x="17" y="18" width="6" height="6" fill="none" stroke="#CFE3EE" stroke-width="1.5"/><rect x="25" y="18" width="6" height="6" fill="none" stroke="#CFE3EE" stroke-width="1.5"/><path d="M8 31q3-3 6 0t6 0t6 0t6 0" fill="none" stroke="#CFE3EE" stroke-width="1.5" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<main>
+
+<header class="hero" id="top">
+  <div class="hero-sky" aria-hidden="true">
+<svg id="h-heroSvg" viewBox="0 0 1440 1100" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+<defs>
+<linearGradient id="h-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A4560"/><stop offset="1" stop-color="#07131F"/></linearGradient>
+<linearGradient id="h-mist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE3EE" stop-opacity="0"/><stop offset="0.5" stop-color="#CFE3EE" stop-opacity="0.14"/><stop offset="1" stop-color="#CFE3EE" stop-opacity="0"/></linearGradient>
+<radialGradient id="h-disc" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#10304A"/><stop offset="1" stop-color="#06131F"/></radialGradient>
+<radialGradient id="h-portGlow"><stop offset="0" stop-color="#F0803C" stop-opacity="0.6"/><stop offset="1" stop-color="#F0803C" stop-opacity="0"/></radialGradient>
+<pattern id="h-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-40)"><path d="M0 0V5" stroke="#CFE3EE" stroke-width="0.7"/></pattern>
+
+<g id="h-k"><rect x="0.5" y="0.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#CFE3EE" stroke-opacity="0.28"/></g>
+<g id="h-ko"><rect x="0.5" y="0.5" width="39" height="9" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.9"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#3A1606" stroke-opacity="0.35"/></g>
+<g id="h-kt"><rect x="0.5" y="0.5" width="39" height="9" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#CFE3EE" stroke-opacity="0.3"/></g>
+<g id="h-kg"><rect x="0.5" y="0.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#0A1A2A" stroke-opacity="0.35"/></g>
+
+<g id="h-sA"><use href="#h-k" y="-10"/><use href="#h-kg" y="-20"/><use href="#h-k" y="-30"/></g>
+<g id="h-sB"><use href="#h-k" y="-10"/><use href="#h-ko" y="-20"/><use href="#h-k" y="-30"/><use href="#h-k" y="-40"/></g>
+<g id="h-sC"><use href="#h-kt" y="-10"/><use href="#h-k" y="-20"/></g>
+<g id="h-sD"><use href="#h-kg" y="-10"/><use href="#h-k" y="-20"/><use href="#h-kt" y="-30"/><use href="#h-k" y="-40"/></g>
+<g id="h-sE"><use href="#h-ko" y="-10"/><use href="#h-k" y="-20"/><use href="#h-k" y="-30"/></g>
+<g id="h-sF"><use href="#h-k" y="-10"/></g>
+<g id="h-sG"><use href="#h-kt" y="-10"/><use href="#h-k" y="-20"/><use href="#h-kg" y="-30"/></g>
+
+<g id="h-pstar"><circle r="16" fill="url(#h-portGlow)"/><path d="M0 -9L2.2 -2.2L9 0L2.2 2.2L0 9L-2.2 2.2L-9 0L-2.2 -2.2Z" fill="#F0803C"/></g>
+<g id="h-spoke"><path d="M720 202V450"/></g>
+<g id="h-ptr"><path d="M708 312C712 288 717 262 720 232C723 262 728 288 732 312Z" fill="#CFE3EE" fill-opacity="0.035" stroke="#CFE3EE" stroke-opacity="0.26"/><circle cx="720" cy="230" r="2.2" fill="#F0803C" fill-opacity="0.7"/></g>
+<path id="h-ringPath" d="M720 192A448 448 0 1 1 719.9 192"/>
+</defs>
+
+<defs><radialGradient id="rayfade" cx="720" cy="640" r="900" gradientUnits="userSpaceOnUse"><stop offset="0.52" stop-color="#fff" stop-opacity="0"/><stop offset="0.62" stop-color="#fff" stop-opacity="1"/><stop offset="0.85" stop-color="#fff" stop-opacity="0.55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><mask id="raymask" maskUnits="userSpaceOnUse" x="-300" y="-400" width="2040" height="1900"><rect x="-300" y="-400" width="2040" height="1900" fill="url(#rayfade)"/></mask></defs><g id="pxRays"><g class="pt" data-d="0.25"><g mask="url(#raymask)"><circle cx="720" cy="640" r="450" fill="none" stroke="#CFE3EE" stroke-opacity="0.075" stroke-width="900" stroke-dasharray="2.8 20.76"/></g></g></g>
+<g id="pxFar"><g class="pt" data-d="0.4">
+<g class="stars-a" fill="#DCEAF2">
+<circle cx="70" cy="110" r="1.3"/><circle cx="150" cy="300" r="1.1"/><circle cx="260" cy="70" r="1.4"/><circle cx="330" cy="200" r="1"/><circle cx="120" cy="420" r="1.2"/><circle cx="40" cy="520" r="1.1"/><circle cx="190" cy="560" r="1.3"/><circle cx="1380" cy="120" r="1.3"/><circle cx="1300" cy="330" r="1.1"/><circle cx="1250" cy="60" r="1.4"/><circle cx="1400" cy="300" r="1"/><circle cx="1330" cy="450" r="1.2"/><circle cx="1390" cy="520" r="1.1"/><circle cx="1180" cy="330" r="1"/><circle cx="560" cy="95" r="1.2"/><circle cx="880" cy="100" r="1.3"/><circle cx="990" cy="120" r="1"/><circle cx="450" cy="120" r="1.1"/><circle cx="250" cy="350" r="1.2"/><circle cx="1320" cy="640" r="1"/>
+</g>
+<g class="stars-b" fill="#DCEAF2">
+<circle cx="100" cy="230" r="1.1"/><circle cx="210" cy="120" r="1.3"/><circle cx="310" cy="90" r="1"/><circle cx="60" cy="360" r="1.2"/><circle cx="160" cy="480" r="1"/><circle cx="280" cy="560" r="1.2"/><circle cx="1360" cy="200" r="1.2"/><circle cx="1220" cy="150" r="1"/><circle cx="1280" cy="250" r="1.3"/><circle cx="1410" cy="420" r="1"/><circle cx="1250" cy="520" r="1.2"/><circle cx="1170" cy="150" r="1.1"/><circle cx="660" cy="110" r="1"/><circle cx="790" cy="95" r="1.2"/><circle cx="520" cy="110" r="1"/><circle cx="930" cy="90" r="1.1"/><circle cx="110" cy="600" r="1"/><circle cx="1340" cy="590" r="1.1"/><circle cx="360" cy="150" r="1"/><circle cx="1050" cy="100" r="1.2"/>
+</g>
+<g fill="#DCEAF2" fill-opacity="0.8">
+<path transform="translate(95 300) scale(0.5)" d="M0 -9L2.2 -2.2L9 0L2.2 2.2L0 9L-2.2 2.2L-9 0L-2.2 -2.2Z"/>
+<path transform="translate(1345 205) scale(0.55)" d="M0 -9L2.2 -2.2L9 0L2.2 2.2L0 9L-2.2 2.2L-9 0L-2.2 -2.2Z"/>
+<path transform="translate(300 120) scale(0.45)" d="M0 -9L2.2 -2.2L9 0L2.2 2.2L0 9L-2.2 2.2L-9 0L-2.2 -2.2Z"/>
+<path transform="translate(1110 108) scale(0.5)" d="M0 -9L2.2 -2.2L9 0L2.2 2.2L0 9L-2.2 2.2L-9 0L-2.2 -2.2Z"/>
+</g>
+
+<g fill="none" stroke="#CFE3EE" stroke-opacity="0.4" stroke-linejoin="round">
+<path d="M110 140L158 170L205 166L246 198L232 244L188 236L205 166"/>
+<path d="M1170 205H1310L1290 232H1190Z"/>
+<path d="M1240 205V128"/>
+<path d="M1240 128L1282 168L1240 196"/>
+<path d="M1310 205L1338 190"/>
+</g>
+<g fill="#DCEAF2" fill-opacity="0.85">
+<circle cx="158" cy="170" r="2.2"/><circle cx="205" cy="166" r="2.2"/><circle cx="246" cy="198" r="2.2"/><circle cx="232" cy="244" r="2.2"/><circle cx="188" cy="236" r="2.2"/>
+<circle cx="1170" cy="205" r="2.2"/><circle cx="1310" cy="205" r="2.2"/><circle cx="1290" cy="232" r="2.2"/><circle cx="1190" cy="232" r="2.2"/><circle cx="1240" cy="128" r="2.2"/><circle cx="1282" cy="168" r="2.2"/><circle cx="1240" cy="196" r="2.2"/><circle cx="1338" cy="190" r="2.2"/>
+</g>
+<g transform="translate(110 140)"><circle r="14" fill="url(#h-portGlow)"/><circle r="3.2" fill="#F0803C"/></g>
+<g font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="2" fill="#CFE3EE" fill-opacity="0.6">
+<text x="96" y="122">STELLA MARIS</text>
+<text x="1240" y="258" text-anchor="middle">ARGO NAVIS</text>
+<text x="1240" y="274" text-anchor="middle" fill-opacity="0.4">THE SHIP</text>
+</g>
+
+</g></g>
+<g id="pxMid"><g class="pt" data-d="0.9">
+<circle cx="720" cy="640" r="522" fill="none" stroke="#CFE3EE" stroke-opacity="0.12"/>
+<circle cx="720" cy="640" r="500" fill="url(#h-disc)" fill-opacity="0.94"/>
+<circle cx="720" cy="640" r="500" fill="none" stroke="#CFE3EE" stroke-opacity="0.55"/>
+<path d="M714 116L726 116L720 130Z" fill="#F0803C"/>
+<text x="720" y="106" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="2" fill="#CFE3EE" fill-opacity="0.7">N</text>
+
+<g class="spin spinA" fill="none" stroke="#CFE3EE">
+<circle cx="720" cy="640" r="490" stroke-width="10" stroke-opacity="0.45" stroke-dasharray="1 16.104"/>
+<circle cx="720" cy="640" r="489" stroke-width="20" stroke-opacity="0.6" stroke-dasharray="1.4 83.95"/>
+</g>
+<g fill="none" stroke="#CFE3EE" stroke-opacity="0.32">
+<circle cx="720" cy="640" r="474"/>
+<circle cx="720" cy="640" r="436"/>
+<circle cx="720" cy="640" r="420" stroke-dasharray="3 7" stroke-opacity="0.25"/>
+</g>
+<g class="spin spinB">
+<text font-family="IBM Plex Mono, monospace" font-size="13" letter-spacing="2" fill="#CFE3EE" fill-opacity="0.6"><textPath href="#h-ringPath" textLength="2800" lengthAdjust="spacing">GENOA · LISBON · LE HAVRE · PIRAEUS · ALGECIRAS · VALENCIA · ROTTERDAM · HAMBURG · ANTWERP · TANGIER · SUEZ · JEDDAH · DUBAI · MUMBAI · COLOMBO · SINGAPORE · SHANGHAI · BUSAN · SYDNEY · DURBAN · SANTOS · HOUSTON · NEW YORK ·</textPath></text>
+</g>
+
+<g fill="none" stroke="#CFE3EE" stroke-opacity="0.2">
+<use href="#h-spoke"/>
+<use href="#h-spoke" transform="rotate(30 720 640)"/><use href="#h-spoke" transform="rotate(60 720 640)"/><use href="#h-spoke" transform="rotate(90 720 640)"/><use href="#h-spoke" transform="rotate(120 720 640)"/><use href="#h-spoke" transform="rotate(150 720 640)"/><use href="#h-spoke" transform="rotate(180 720 640)"/><use href="#h-spoke" transform="rotate(210 720 640)"/><use href="#h-spoke" transform="rotate(240 720 640)"/><use href="#h-spoke" transform="rotate(270 720 640)"/><use href="#h-spoke" transform="rotate(300 720 640)"/><use href="#h-spoke" transform="rotate(330 720 640)"/>
+</g>
+<g fill="none" stroke="#CFE3EE" stroke-opacity="0.28">
+<circle cx="720" cy="640" r="200"/>
+<circle cx="720" cy="640" r="130" stroke-dasharray="3 7"/>
+<circle cx="720" cy="640" r="60"/>
+<circle cx="720" cy="640" r="250" stroke-dasharray="3 7"/>
+<path d="M600 640H840M720 520V760" stroke-opacity="0.18"/>
+</g>
+
+<g class="spin spinC" fill="none">
+<circle cx="720" cy="640" r="330" stroke="#CFE3EE" stroke-opacity="0.4" stroke-dasharray="2 6"/>
+<circle cx="720" cy="668" r="292" stroke="#CFE3EE" stroke-opacity="0.35"/>
+<use href="#h-ptr"/>
+<use href="#h-ptr" transform="rotate(45 720 640)"/><use href="#h-ptr" transform="rotate(90 720 640)"/><use href="#h-ptr" transform="rotate(135 720 640)"/><use href="#h-ptr" transform="rotate(180 720 640)"/><use href="#h-ptr" transform="rotate(225 720 640)"/><use href="#h-ptr" transform="rotate(270 720 640)"/><use href="#h-ptr" transform="rotate(315 720 640)"/>
+</g>
+<circle cx="720" cy="640" r="5" fill="#CFE3EE" fill-opacity="0.7"/>
+
+<g fill="none" stroke="#F0803C" stroke-linecap="round">
+<path d="M720 770C590 700 400 600 300 432" stroke-opacity="0.22"/>
+<path d="M720 770C560 740 340 700 215 592" stroke-opacity="0.22"/>
+<path d="M720 770C640 730 520 700 432 690" stroke-opacity="0.22"/>
+<path d="M720 770C850 700 1040 600 1140 432" stroke-opacity="0.22"/>
+<path d="M720 770C880 740 1100 700 1225 592" stroke-opacity="0.22"/>
+<path d="M720 770C800 730 920 700 1008 690" stroke-opacity="0.22"/>
+<path class="flow" d="M720 770C590 700 400 600 300 432" stroke-width="1.6" stroke-dasharray="7 7"/>
+<path class="flow" style="animation-delay:-0.4s" d="M720 770C560 740 340 700 215 592" stroke-width="1.6" stroke-dasharray="7 7"/>
+<path class="flow" style="animation-delay:-0.8s" d="M720 770C640 730 520 700 432 690" stroke-width="1.6" stroke-dasharray="7 7"/>
+<path class="flow" style="animation-delay:-0.2s" d="M720 770C850 700 1040 600 1140 432" stroke-width="1.6" stroke-dasharray="7 7"/>
+<path class="flow" style="animation-delay:-0.6s" d="M720 770C880 740 1100 700 1225 592" stroke-width="1.6" stroke-dasharray="7 7"/>
+<path class="flow" style="animation-delay:-1s" d="M720 770C800 730 920 700 1008 690" stroke-width="1.6" stroke-dasharray="7 7"/>
+</g>
+
+<g class="pulse"><use href="#h-pstar" transform="translate(300 432)"/></g>
+<g class="pulse" style="animation-delay:-1s"><use href="#h-pstar" transform="translate(215 592)"/></g>
+<g class="pulse" style="animation-delay:-2s"><use href="#h-pstar" transform="translate(432 690)"/></g>
+<g class="pulse" style="animation-delay:-0.5s"><use href="#h-pstar" transform="translate(1140 432)"/></g>
+<g class="pulse" style="animation-delay:-1.5s"><use href="#h-pstar" transform="translate(1225 592)"/></g>
+<g class="pulse" style="animation-delay:-2.5s"><use href="#h-pstar" transform="translate(1008 690)"/></g>
+<use href="#h-pstar" transform="translate(720 770) scale(1.4)"/>
+<g font-family="IBM Plex Mono, monospace" font-size="11" letter-spacing="1.5" fill="#EAF3F8" fill-opacity="0.85">
+<text x="286" y="436" text-anchor="end">ROTTERDAM</text>
+<text x="201" y="596" text-anchor="end">PIRAEUS</text>
+<text x="418" y="694" text-anchor="end">SANTOS</text>
+<text x="1154" y="436">DUBAI</text>
+<text x="1239" y="596">MUMBAI</text>
+<text x="1022" y="694">SINGAPORE</text>
+<text x="720" y="746" text-anchor="middle" font-weight="500">YOUR CARGO</text>
+</g>
+
+</g></g>
+<g id="pxNear"><g class="pt" data-d="1.7">
+<rect x="-200" y="1090" width="1840" height="1700" fill="#07131F"/>
+<path d="M-90 850V834H-20C60 826 120 832 190 826C250 822 300 832 360 838L420 850Z" fill="#0C2539" stroke="#CFE3EE" stroke-opacity="0.3"/>
+<path d="M-90 850V834H-20C60 826 120 832 190 826C250 822 300 832 360 838L420 850Z" fill="url(#h-hatch)" opacity="0.3"/>
+<path d="M1020 850C1080 836 1140 828 1210 830C1290 832 1360 826 1460 832H1530V850Z" fill="#0C2539" stroke="#CFE3EE" stroke-opacity="0.3"/>
+<path d="M1020 850C1080 836 1140 828 1210 830C1290 832 1360 826 1460 832H1530V850Z" fill="url(#h-hatch)" opacity="0.3"/>
+
+<rect x="-90" y="850" width="1620" height="260" fill="url(#h-sea)"/>
+<rect x="-90" y="838" width="1620" height="40" fill="url(#h-mist)"/>
+<path d="M-90 850H1530" stroke="#CFE3EE" stroke-opacity="0.35"/>
+<path d="M20 846H300M1160 846H1420" stroke="#F5B56B" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1 11" stroke-opacity="0.6"/>
+
+<g fill="none" stroke="#CFE3EE" stroke-linecap="round" stroke-dasharray="10 6">
+<path d="M220 850A500 74 0 0 0 1220 850" stroke-opacity="0.3"/>
+<path d="M244 850A476 70 0 0 0 1196 850" stroke-opacity="0.24"/>
+<path d="M284 850A436 64 0 0 0 1156 850" stroke-opacity="0.2"/>
+<path d="M390 850A330 49 0 0 0 1050 850" stroke-opacity="0.16"/>
+<path d="M470 850A250 37 0 0 0 970 850" stroke-opacity="0.13"/>
+<path d="M590 850A130 19 0 0 0 850 850" stroke-opacity="0.1"/>
+</g>
+<g fill="none" stroke="#CFE3EE" stroke-linecap="round">
+<path class="wv" style="--len:366" d="M0 868H1440" stroke-opacity="0.16" stroke-dasharray="70 18 22 26 140 30 40 20"/>
+<path class="wv2" style="--len:380" d="M0 892H1440" stroke-opacity="0.14" stroke-dasharray="30 24 90 16 50 28 120 22"/>
+<path class="wv" style="--len:272" d="M0 922H1440" stroke-opacity="0.12" stroke-dasharray="110 20 36 30 60 16"/>
+<path class="wv2" style="--len:270" d="M0 956H1440" stroke-opacity="0.12" stroke-dasharray="50 22 130 18 24 26"/>
+<path d="M0 996H1440" stroke-opacity="0.09" stroke-dasharray="90 26 40 20 150 24"/>
+<path d="M0 1040H1440" stroke-opacity="0.07" stroke-dasharray="60 30 100 22"/>
+</g>
+
+<g transform="translate(-545 451) scale(1.3)">
+<g fill="none" stroke="#CFE3EE" stroke-linecap="round">
+<path d="M740 354H1210" stroke-opacity="0.28" stroke-dasharray="60 10 140 8 30 12 90 10"/>
+<path d="M760 362H1190" stroke-opacity="0.2" stroke-dasharray="40 14 100 12 60 10"/>
+<path d="M790 372H1160" stroke-opacity="0.14" stroke-dasharray="30 16 80 14 50 12"/>
+<path d="M830 384H1120" stroke-opacity="0.09" stroke-dasharray="20 18 60 16"/>
+</g>
+<path d="M726 352V372M738 352V366M750 352V360" stroke="#F5B56B" stroke-opacity="0.35" stroke-linecap="round"/>
+
+<g class="ship">
+<path d="M692 298H1198C1222 298 1240 288 1254 270L1234 330H714Z" fill="#0B2236" stroke="#CFE3EE" stroke-opacity="0.85" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M692 298H1198C1222 298 1240 288 1254 270L1234 330H714Z" fill="url(#h-hatch)" opacity="0.2"/>
+<path d="M714 330H1234L1227 345H723Z" fill="#B5502A" fill-opacity="0.9"/>
+<path d="M701 306H1238" stroke="#CFE3EE" stroke-opacity="0.35"/>
+<text x="905" y="322" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="3" fill="#CFE3EE" fill-opacity="0.5">CARGOAGENTS.SI</text>
+
+<rect x="718" y="262" width="60" height="36" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="726" y="244" width="44" height="18" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="720" y="236" width="58" height="9" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<path d="M724 240.5H774" stroke="#F5B56B" stroke-width="3" stroke-dasharray="5 3"/>
+<path d="M724 252H766M724 270H772M724 281H772" stroke="#F5B56B" stroke-opacity="0.7" stroke-width="2" stroke-dasharray="3 5"/>
+<rect x="746" y="216" width="14" height="22" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="746" y="222" width="14" height="6" fill="#E8793A"/>
+<path d="M736 236V206M729 212H743" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<path d="M1212 298V280" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<circle cx="1212" cy="279" r="1.6" fill="#EAF3F8"/>
+<circle class="puff" cx="753" cy="212" r="3" fill="none" stroke="#CFE3EE" stroke-opacity="0.6"/>
+<circle class="puff" style="animation-delay:-2s" cx="753" cy="212" r="3" fill="none" stroke="#CFE3EE" stroke-opacity="0.6"/>
+<circle class="puff" style="animation-delay:-4s" cx="753" cy="212" r="3" fill="none" stroke="#CFE3EE" stroke-opacity="0.6"/>
+
+<use href="#h-sA" x="792" y="298"/><use href="#h-sB" x="834" y="298"/><use href="#h-sD" x="876" y="298"/><use href="#h-sA" x="918" y="298"/><use href="#h-sB" x="960" y="298"/><use href="#h-sD" x="1002" y="298"/><use href="#h-sG" x="1044" y="298"/><use href="#h-sC" x="1086" y="298"/><use href="#h-sE" x="1128" y="298"/>
+<circle class="bl" cx="736" cy="205" r="1.8" fill="#FF5A4A"/>
+</g>
+</g>
+
+<g class="gull" style="animation-duration:15s"><path d="M300 330q8-9 16 0q8-9 16 0" fill="none" stroke="#DCEAF2" stroke-width="1.5" stroke-linecap="round"/></g>
+<g class="gull" style="animation-duration:19s;animation-delay:-6s"><path d="M1080 300q6-7 12 0q6-7 12 0" fill="none" stroke="#DCEAF2" stroke-width="1.3" stroke-linecap="round"/></g>
+<g class="gull" style="animation-duration:13s;animation-delay:-3s"><path d="M1160 360q4-5 8 0q4-5 8 0" fill="none" stroke="#DCEAF2" stroke-width="1.1" stroke-linecap="round"/></g>
+</g></g>
+</svg>
+  </div>
+  <div class="hero-vig" aria-hidden="true"></div>
+  <div class="hero-fade" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="#top" aria-label="Cargo Agents home"><svg width="40" height="40" aria-hidden="true"><use href="#i-mark"/></svg><span>Cargo Agents</span></a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#story">How it works</a>
+        <a href="#agent">The agent</a>
+        <a href="#modes">Containers</a>
+      </nav>
+      <a class="btn btn-ghost btn-sm" href="#quote">Request a quote</a>
+    </div>
+
+    <div class="hero-copy" id="heroCopy">
+      <h1 class="rise" style="animation-delay:.1s">Sea freight<br><em>that thinks ahead.</em></h1>
+      <p class="hero-sub rise" style="animation-delay:.25s">Cargo Agents puts an agent on every container. It quotes, books, clears customs and follows your cargo until it lands.</p>
+      <div class="hero-cta rise" style="animation-delay:.4s">
+        <a class="btn btn-primary" href="#quote">Request a quote <svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-ghost" href="#story">See how it works</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-foot"><div class="wrap"><div><span>CARGOAGENTS.SI · SEA FREIGHT · FCL · LCL · REEFER</span><span>Scroll to follow a container</span></div></div></div>
+</header>
+
+<section class="manifesto" aria-label="The idea">
+  <div class="wrap">
+    <p id="manifesto">Every container gets <em>its own agent.</em> It reads the paperwork, picks the sailing, clears customs and tells you what happened before you have to ask.</p>
+    <div class="manifesto-meta"><span class="label">Full containers</span><span class="label">Part loads</span><span class="label">Refrigerated</span><span class="label">Customs included</span></div>
+  </div>
+</section>
+
+<section class="story" id="story" aria-labelledby="storyH">
+  <div class="story-pin" id="storyPin">
+    <div class="wrap story-grid">
+      <div class="story-head"><h2 id="storyH">One container, followed from <em>port to port.</em></h2></div>
+
+      <div class="story-globe">
+        <svg class="globe" id="globe" viewBox="0 0 520 520" role="img" aria-label="Example sea route across a globe with five stops: loading port, departure, at sea, discharge port and release">
+          <defs>
+            <radialGradient id="g-disc" cx="42%" cy="38%" r="75%"><stop offset="0" stop-color="#14405F"/><stop offset="1" stop-color="#06131F"/></radialGradient>
+            <radialGradient id="g-glow"><stop offset="0" stop-color="#F0803C" stop-opacity=".7"/><stop offset="1" stop-color="#F0803C" stop-opacity="0"/></radialGradient>
+          </defs>
+          <circle class="spin-g" cx="260" cy="260" r="246" fill="none" stroke="#CFE3EE" stroke-opacity=".35" stroke-dasharray="2 9"/>
+          <circle cx="260" cy="260" r="230" fill="url(#g-disc)" stroke="#CFE3EE" stroke-opacity=".6"/>
+          <g fill="none" stroke="#CFE3EE" stroke-opacity=".2">
+            <ellipse cx="260" cy="260" rx="78.7" ry="230"/>
+            <ellipse cx="260" cy="260" rx="147.8" ry="230"/>
+            <ellipse cx="260" cy="260" rx="199.2" ry="230"/>
+            <ellipse cx="260" cy="260" rx="226.5" ry="230"/>
+            <path d="M260 30V490"/>
+            <ellipse cx="260" cy="444.7" rx="115.0" ry="43.1"/>
+            <ellipse cx="260" cy="366.6" rx="199.2" ry="74.6"/>
+            <ellipse cx="260" cy="260.0" rx="230.0" ry="86.2"/>
+            <ellipse cx="260" cy="153.4" rx="199.2" ry="74.6"/>
+            <ellipse cx="260" cy="75.3" rx="115.0" ry="43.1"/>
+          </g>
+          <path d="M140 330C190 300 250 292 304 270C346 252 352 190 330 148" fill="none" stroke="#CFE3EE" stroke-opacity=".28" stroke-dasharray="3 6"/>
+          <path id="routeBase" d="M140 330C160 372 190 396 228 396C280 396 322 376 352 346C384 316 396 282 388 244C380 206 360 170 330 148" fill="none" stroke="#F0803C" stroke-opacity=".28" stroke-width="2" stroke-linecap="round"/>
+          <path id="route" d="M140 330C160 372 190 396 228 396C280 396 322 376 352 346C384 316 396 282 388 244C380 206 360 170 330 148" fill="none" stroke="#F0803C" stroke-width="2.6" stroke-linecap="round"/>
+          <g class="node is-lit" data-i="0"><circle cx="140" cy="330" r="6"/><text x="126" y="352" text-anchor="end">LOAD PORT</text></g>
+          <g class="node" data-i="1"><circle cx="228" cy="396" r="6"/><text x="228" y="422" text-anchor="middle">DEPARTS</text></g>
+          <g class="node" data-i="2"><circle cx="352" cy="346" r="6"/><text x="366" y="368">AT SEA</text></g>
+          <g class="node" data-i="3"><circle cx="388" cy="244" r="6"/><text x="402" y="248">DISCHARGE</text></g>
+          <g class="node" data-i="4"><circle cx="330" cy="148" r="6"/><text x="344" y="140">RELEASED</text></g>
+          <g id="marker" transform="translate(140 330)"><circle r="16" fill="url(#g-glow)"/><circle r="4.5" fill="#FFB27A"/></g>
+        </svg>
+        <p class="globe-cap">Example route. Not to scale.</p>
+      </div>
+
+      <ol class="steps" id="steps">
+        <li class="step is-active" data-i="0"><span class="step-n">1</span><div><h3>Quote</h3><div class="step-body"><div><p>You send the loading port, the discharge port and the cargo. The agent checks the sailings and replies with options and prices.</p></div></div></div></li>
+        <li class="step" data-i="1"><span class="step-n">2</span><div><h3>Book</h3><div class="step-body"><div><p>It picks the carrier and the sailing, reserves the space and confirms the cut-off dates with you.</p></div></div></div></li>
+        <li class="step" data-i="2"><span class="step-n">3</span><div><h3>Clear</h3><div class="step-body"><div><p>It prepares the customs entries, matches the paperwork to the cargo and files them.</p></div></div></div></li>
+        <li class="step" data-i="3"><span class="step-n">4</span><div><h3>Track</h3><div class="step-body"><div><p>It follows the vessel from port to port and warns you about a delay the moment it appears.</p></div></div></div></li>
+        <li class="step" data-i="4"><span class="step-n">5</span><div><h3>Release</h3><div class="step-body"><div><p>The cargo is released at the discharge port and every document ends up in one place, ready for your accounts.</p></div></div></div></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section class="console" id="agent" aria-labelledby="agentH">
+  <div class="wrap console-grid">
+    <div class="console-copy">
+      <h2 id="agentH">Watch an agent <em>work.</em></h2>
+      <p>This is an example run. The agent reads, checks and prices on its own, then stops at the one decision that belongs to you.</p>
+      <button class="btn btn-ghost" id="replay" type="button">Replay the run</button>
+    </div>
+    <figure class="term" id="term" aria-label="Example agent run">
+      <div class="term-in">
+        <div class="term-bar"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="label">Agent · example run</span></div>
+        <ol class="log" id="log" aria-live="polite">
+          <li data-base class="is-done"><span class="st" aria-hidden="true"><svg class="ic-pend"><use href="#i-pend"/></svg><svg class="ic-done"><use href="#i-done"/></svg></span><span class="tx">Read the commercial invoice. 14 line items.</span></li>
+          <li data-base class="is-done"><span class="st" aria-hidden="true"><svg class="ic-pend"><use href="#i-pend"/></svg><svg class="ic-done"><use href="#i-done"/></svg></span><span class="tx">Matched each item to a tariff code.</span></li>
+          <li data-base class="is-done"><span class="st" aria-hidden="true"><svg class="ic-pend"><use href="#i-pend"/></svg><svg class="ic-done"><use href="#i-done"/></svg></span><span class="tx">Checked both ports for delays and closures.</span></li>
+          <li data-base class="is-done"><span class="st" aria-hidden="true"><svg class="ic-pend"><use href="#i-pend"/></svg><svg class="ic-done"><use href="#i-done"/></svg></span><span class="tx">Priced two sailings for this container.</span></li>
+          <li data-base data-last class="is-wait"><span class="st" aria-hidden="true"><svg class="ic-pend"><use href="#i-pend"/></svg><svg class="ic-done"><use href="#i-done"/></svg></span><span class="tx">The direct sailing arrives first. The other costs less. Waiting for your choice.</span></li>
+        </ol>
+        <div class="decide is-on" id="decide"><span>Which matters more?</span><button class="chip" type="button" data-pick="direct">Arrive first</button><button class="chip" type="button" data-pick="cheap">Pay less</button></div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<section class="modes" id="modes" aria-labelledby="modesH">
+  <div class="wrap">
+    <div class="modes-head">
+      <h2 id="modesH">Three ways to fill a container. <em>One agent</em> for all of them.</h2>
+      <div class="tabs" id="tabs" role="tablist" aria-label="Container types">
+        <span class="tabs-pill" aria-hidden="true"></span>
+        <button class="tab" role="tab" id="tab-fcl" aria-controls="panel-fcl" aria-selected="true" type="button">Full container</button>
+        <button class="tab" role="tab" id="tab-lcl" aria-controls="panel-lcl" aria-selected="false" tabindex="-1" type="button">Part load</button>
+        <button class="tab" role="tab" id="tab-reefer" aria-controls="panel-reefer" aria-selected="false" tabindex="-1" type="button">Refrigerated</button>
+      </div>
+    </div>
+    <div class="panels">
+      <div class="panel is-on" role="tabpanel" id="panel-fcl" aria-labelledby="tab-fcl">
+        <div><h3>Full container</h3><p>A whole box for your cargo. The agent books the container and the sailing, then follows the vessel and plans around the port.</p>
+          <dl class="watch"><div><dt>Books</dt><dd>Carrier, container size and sailing date.</dd></div><div><dt>Files</dt><dd>Bill of lading, customs entry and port documents.</dd></div><div><dt>Watches</dt><dd>Vessel position, port congestion and cut-off times.</dd></div></dl></div>
+        <div class="plate" aria-hidden="true"><svg viewBox="0 0 480 300" preserveAspectRatio="xMidYMid slice" focusable="false"><g fill="#DCEAF2" fill-opacity="0.7"><circle cx="40" cy="36" r="1.1"/><circle cx="92" cy="70" r="1.0"/><circle cx="150" cy="28" r="1.2"/><circle cx="214" cy="52" r="1.0"/><circle cx="300" cy="30" r="1.1"/><circle cx="366" cy="62" r="1.0"/><circle cx="430" cy="34" r="1.2"/><circle cx="452" cy="90" r="1.0"/><circle cx="24" cy="110" r="1.0"/><circle cx="260" cy="86" r="1.0"/></g><circle cx="404" cy="66" r="20" fill="#DDEAF2" fill-opacity="0.92"/><circle cx="404" cy="66" r="30" fill="none" stroke="#CFE3EE" stroke-opacity="0.25"/><path d="M0 224H480V300H0Z" fill="#0A2033"/><path d="M0 224H480" stroke="#CFE3EE" stroke-opacity="0.35"/><path d="M64 188H412C430 188 444 180 454 166L438 224H80Z" fill="#0B2236" stroke="#CFE3EE" stroke-opacity="0.85" stroke-linejoin="round"/><path d="M80 224H438L432 236H86Z" fill="#B5502A" fill-opacity="0.9"/><rect x="150.5" y="178.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M155.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M160.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M165.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M170.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M175.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M180.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M185.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><rect x="190.5" y="178.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M195.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M200.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M205.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M210.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M215.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M220.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M225.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="230.5" y="178.5" width="39" height="9" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M235.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M240.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M245.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M250.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M255.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M260.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M265.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="270.5" y="178.5" width="39" height="9" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.9"/><path d="M275.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M280.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M285.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M290.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M295.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M300.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M305.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><rect x="310.5" y="178.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M315.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M320.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M325.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M330.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M335.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M340.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><path d="M345.0 179.5V186.5" stroke="#000" stroke-opacity="0.2"/><rect x="350.5" y="178.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M355.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M360.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M365.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M370.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M375.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M380.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M385.0 179.5V186.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="150.5" y="168.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M155.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M160.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M165.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M170.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M175.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M180.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M185.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="190.5" y="168.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M195.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M200.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M205.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M210.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M215.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M220.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M225.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><rect x="230.5" y="168.5" width="39" height="9" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.9"/><path d="M235.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M240.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M245.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M250.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M255.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M260.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M265.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><rect x="270.5" y="168.5" width="39" height="9" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M275.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M280.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M285.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M290.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M295.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M300.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M305.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="310.5" y="168.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M315.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M320.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M325.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M330.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M335.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M340.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M345.0 169.5V176.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="350.5" y="168.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M355.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M360.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M365.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M370.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M375.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M380.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><path d="M385.0 169.5V176.5" stroke="#000" stroke-opacity="0.2"/><rect x="150.5" y="158.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M155.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M160.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M165.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M170.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M175.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M180.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M185.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="190.5" y="158.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M195.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M200.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M205.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M210.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M215.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M220.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M225.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="230.5" y="158.5" width="39" height="9" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.9"/><path d="M235.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M240.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M245.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M250.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M255.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M260.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M265.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><rect x="270.5" y="158.5" width="39" height="9" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M275.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M280.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M285.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M290.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M295.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M300.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M305.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="310.5" y="158.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M315.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M320.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M325.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M330.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M335.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M340.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><path d="M345.0 159.5V166.5" stroke="#CFE3EE" stroke-opacity="0.2"/><rect x="350.5" y="158.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.7"/><path d="M355.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M360.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M365.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M370.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M375.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M380.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><path d="M385.0 159.5V166.5" stroke="#000" stroke-opacity="0.2"/><rect x="84" y="146" width="54" height="42" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/><rect x="94" y="128" width="36" height="18" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/><rect x="104" y="108" width="14" height="20" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/><rect x="104" y="114" width="14" height="6" fill="#E8793A"/><path d="M92 137H126M90 156H132M90 168H132" stroke="#F5B56B" stroke-opacity="0.75" stroke-width="2" stroke-dasharray="3 5"/><path d="M0 246 H480" stroke="#CFE3EE" stroke-opacity="0.20" stroke-dasharray="60 14 26 20" fill="none"/><path d="M0 258 H480" stroke="#CFE3EE" stroke-opacity="0.16" stroke-dasharray="30 20 90 14" fill="none"/><path d="M0 270 H480" stroke="#CFE3EE" stroke-opacity="0.12" stroke-dasharray="80 16 30 24" fill="none"/><path d="M0 282 H480" stroke="#CFE3EE" stroke-opacity="0.08" stroke-dasharray="40 26 60 18" fill="none"/></svg></div>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-lcl" aria-labelledby="tab-lcl">
+        <div><h3>Part load</h3><p>Less than a container. The agent finds a consolidator, books your space and follows the box you share.</p>
+          <dl class="watch"><div><dt>Books</dt><dd>Consolidator, cargo volume and sailing date.</dd></div><div><dt>Files</dt><dd>House bill of lading, packing list and customs entry.</dd></div><div><dt>Watches</dt><dd>Warehouse cut-off, vessel position and unloading at arrival.</dd></div></dl></div>
+        <div class="plate" aria-hidden="true"><svg viewBox="0 0 480 300" preserveAspectRatio="xMidYMid slice" focusable="false"><g fill="#DCEAF2" fill-opacity="0.7"><circle cx="40" cy="36" r="1.1"/><circle cx="92" cy="70" r="1.0"/><circle cx="150" cy="28" r="1.2"/><circle cx="214" cy="52" r="1.0"/><circle cx="300" cy="30" r="1.1"/><circle cx="366" cy="62" r="1.0"/><circle cx="430" cy="34" r="1.2"/><circle cx="452" cy="90" r="1.0"/><circle cx="24" cy="110" r="1.0"/><circle cx="260" cy="86" r="1.0"/></g><circle cx="404" cy="66" r="20" fill="#DDEAF2" fill-opacity="0.92"/><circle cx="404" cy="66" r="30" fill="none" stroke="#CFE3EE" stroke-opacity="0.25"/><path d="M0 232H480V300H0Z" fill="#0A2033"/><path d="M0 232H480" stroke="#CFE3EE" stroke-opacity="0.4"/><path d="M0 248H480M0 266H480" stroke="#CFE3EE" stroke-opacity="0.12" stroke-dasharray="40 20" fill="none"/><rect x="56" y="96" width="368" height="130" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.85"/><rect x="68" y="108" width="344" height="106" fill="#06131F" stroke="#CFE3EE" stroke-opacity="0.5"/><path d="M76 99V105M76 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M88 99V105M88 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M100 99V105M100 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M112 99V105M112 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M124 99V105M124 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M136 99V105M136 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M148 99V105M148 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M160 99V105M160 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M172 99V105M172 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M184 99V105M184 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M196 99V105M196 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M208 99V105M208 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M220 99V105M220 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M232 99V105M232 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M244 99V105M244 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M256 99V105M256 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M268 99V105M268 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M280 99V105M280 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M292 99V105M292 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M304 99V105M304 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M316 99V105M316 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M328 99V105M328 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M340 99V105M340 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M352 99V105M352 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M364 99V105M364 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M376 99V105M376 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M388 99V105M388 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M400 99V105M400 217V223" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M56 226H424V232H56Z" fill="#0A1D2E" stroke="#CFE3EE" stroke-opacity="0.6"/><rect x="74" y="209" width="62" height="5" fill="#0A1D2E" stroke="#CFE3EE" stroke-opacity="0.55"/><path d="M80 209V214 M130 209V214" stroke="#CFE3EE" stroke-opacity="0.4"/><rect x="76" y="168" width="58" height="41" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.8"/><path d="M76 168L134 209M134 168L76 209" stroke="#000" stroke-opacity="0.22"/><path d="M76 188H134" stroke="#000" stroke-opacity="0.3"/><rect x="76" y="128" width="58" height="40" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.8"/><path d="M76 128L134 168M134 128L76 168" stroke="#000" stroke-opacity="0.22"/><path d="M76 148H134" stroke="#000" stroke-opacity="0.3"/><rect x="140" y="209" width="54" height="5" fill="#0A1D2E" stroke="#CFE3EE" stroke-opacity="0.55"/><path d="M146 209V214 M188 209V214" stroke="#CFE3EE" stroke-opacity="0.4"/><rect x="142" y="160" width="50" height="49" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.8"/><path d="M142 160L192 209M192 160L142 209" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M142 184H192" stroke="#CFE3EE" stroke-opacity="0.3"/><rect x="142" y="126" width="50" height="34" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.8"/><path d="M142 126L192 160M192 126L142 160" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M142 143H192" stroke="#CFE3EE" stroke-opacity="0.3"/><rect x="198" y="209" width="62" height="5" fill="#0A1D2E" stroke="#CFE3EE" stroke-opacity="0.55"/><path d="M204 209V214 M254 209V214" stroke="#CFE3EE" stroke-opacity="0.4"/><rect x="200" y="176" width="58" height="33" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.8"/><path d="M200 176L258 209M258 176L200 209" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M200 192H258" stroke="#CFE3EE" stroke-opacity="0.3"/><rect x="200" y="140" width="58" height="36" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.8"/><path d="M200 140L258 176M258 140L200 176" stroke="#000" stroke-opacity="0.22"/><path d="M200 158H258" stroke="#000" stroke-opacity="0.3"/><rect x="264" y="209" width="54" height="5" fill="#0A1D2E" stroke="#CFE3EE" stroke-opacity="0.55"/><path d="M270 209V214 M312 209V214" stroke="#CFE3EE" stroke-opacity="0.4"/><rect x="266" y="164" width="50" height="45" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.8"/><path d="M266 164L316 209M316 164L266 209" stroke="#000" stroke-opacity="0.22"/><path d="M266 186H316" stroke="#000" stroke-opacity="0.3"/><rect x="266" y="126" width="50" height="38" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.8"/><path d="M266 126L316 164M316 126L266 164" stroke="#000" stroke-opacity="0.22"/><path d="M266 145H316" stroke="#000" stroke-opacity="0.3"/><rect x="322" y="209" width="62" height="5" fill="#0A1D2E" stroke="#CFE3EE" stroke-opacity="0.55"/><path d="M328 209V214 M378 209V214" stroke="#CFE3EE" stroke-opacity="0.4"/><rect x="324" y="172" width="58" height="37" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.8"/><path d="M324 172L382 209M382 172L324 209" stroke="#CFE3EE" stroke-opacity="0.22"/><path d="M324 190H382" stroke="#CFE3EE" stroke-opacity="0.3"/><rect x="324" y="132" width="58" height="40" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.8"/><path d="M324 132L382 172M382 132L324 172" stroke="#000" stroke-opacity="0.22"/><path d="M324 152H382" stroke="#000" stroke-opacity="0.3"/><path d="M56 96V226M424 96V226" stroke="#CFE3EE" stroke-opacity="0.9" stroke-width="2"/><path d="M76 118H400" stroke="#F5B56B" stroke-opacity="0.5" stroke-width="2" stroke-dasharray="2 10" stroke-linecap="round"/><text x="240" y="84" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="3" fill="#CFE3EE" fill-opacity="0.55">THREE SHIPPERS · ONE BOX</text></svg></div>
+      </div>
+      <div class="panel" role="tabpanel" id="panel-reefer" aria-labelledby="tab-reefer">
+        <div><h3>Refrigerated</h3><p>Cargo that has to stay cold. The agent books a reefer unit and keeps an eye on the set temperature all the way.</p>
+          <dl class="watch"><div><dt>Books</dt><dd>Reefer unit, power supply and set temperature.</dd></div><div><dt>Files</dt><dd>Bill of lading, health certificate and customs entry.</dd></div><div><dt>Watches</dt><dd>Temperature log, vessel position and power at the port.</dd></div></dl></div>
+        <div class="plate" aria-hidden="true"><svg viewBox="0 0 480 300" preserveAspectRatio="xMidYMid slice" focusable="false"><g fill="#DCEAF2" fill-opacity="0.7"><circle cx="40" cy="36" r="1.1"/><circle cx="92" cy="70" r="1.0"/><circle cx="150" cy="28" r="1.2"/><circle cx="214" cy="52" r="1.0"/><circle cx="300" cy="30" r="1.1"/><circle cx="366" cy="62" r="1.0"/><circle cx="430" cy="34" r="1.2"/><circle cx="452" cy="90" r="1.0"/><circle cx="24" cy="110" r="1.0"/><circle cx="260" cy="86" r="1.0"/></g><circle cx="404" cy="66" r="20" fill="#DDEAF2" fill-opacity="0.92"/><circle cx="404" cy="66" r="30" fill="none" stroke="#CFE3EE" stroke-opacity="0.25"/><path d="M0 232H480V300H0Z" fill="#0A2033"/><path d="M0 232H480" stroke="#CFE3EE" stroke-opacity="0.4"/><path d="M0 250H480M0 268H480" stroke="#CFE3EE" stroke-opacity="0.12" stroke-dasharray="40 20" fill="none"/><rect x="96" y="112" width="330" height="112" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.85"/><path d="M116 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M126 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M136 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M146 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M156 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M166 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M176 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M186 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M196 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M206 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M216 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M226 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M236 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M246 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M256 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M266 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M276 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M286 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M296 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M306 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M316 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M326 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M336 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M346 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M356 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M366 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M376 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M386 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M396 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M406 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M416 116V220" stroke="#CFE3EE" stroke-opacity="0.16"/><path d="M96 168H426" stroke="#C8602A" stroke-width="5"/><rect x="96" y="224" width="330" height="8" fill="#0A1D2E" stroke="#CFE3EE" stroke-opacity="0.6"/><rect x="56" y="112" width="40" height="112" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.9"/><circle cx="76" cy="148" r="14" fill="#06131F" stroke="#CFE3EE" stroke-opacity="0.85"/><circle cx="76" cy="148" r="3" fill="#CFE3EE" fill-opacity="0.8"/><path d="M76 148L76 135M76 148L88 155M76 148L64 155" stroke="#CFE3EE" stroke-opacity="0.7" stroke-width="2.4" stroke-linecap="round"/><path d="M62 180H90M62 188H90M62 196H90M62 204H90" stroke="#CFE3EE" stroke-opacity="0.35"/><rect x="62" y="118" width="28" height="12" fill="#06131F" stroke="#CFE3EE" stroke-opacity="0.6"/><text x="76" y="127.5" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="8" fill="#6FD0B4">-18C</text><circle cx="84" cy="214" r="2.4" fill="#6FD0B4"/><path d="M104 100C170 82 250 82 330 100" fill="none" stroke="#6FD0B4" stroke-opacity="0.6" stroke-dasharray="5 7"/><path d="M322 94L332 100L322 106" fill="none" stroke="#6FD0B4" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/><g transform="translate(246 48)" stroke="#CFE3EE" stroke-opacity="0.8" stroke-width="1.4" stroke-linecap="round" fill="none"><path d="M0 -16L0 16" transform="rotate(0)"/><path d="M0 -16L0 16" transform="rotate(60)"/><path d="M0 -16L0 16" transform="rotate(120)"/><path d="M-4 -12L0 -8L4 -12" transform="rotate(0)"/><path d="M-4 -12L0 -8L4 -12" transform="rotate(60)"/><path d="M-4 -12L0 -8L4 -12" transform="rotate(120)"/><path d="M-4 -12L0 -8L4 -12" transform="rotate(180)"/><path d="M-4 -12L0 -8L4 -12" transform="rotate(240)"/><path d="M-4 -12L0 -8L4 -12" transform="rotate(300)"/></g><path d="M56 206C40 206 34 222 34 240V246" fill="none" stroke="#CFE3EE" stroke-opacity="0.7" stroke-width="1.6"/><rect x="22" y="246" width="24" height="26" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/><circle cx="34" cy="259" r="3" fill="#F5B56B"/><path d="M0 232H480" stroke="#CFE3EE" stroke-opacity="0.0"/></svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="quote" id="quote" aria-labelledby="quoteH">
+  <div class="wrap quote-grid">
+    <div class="quote-copy">
+      <h2 id="quoteH">Tell us where it <em>needs to be.</em></h2>
+      <p>Fill in what you know. The agent needs two ports and a cargo to start, and it asks for the rest.</p>
+      <span class="addr">hello@cargoagents.si</span>
+    </div>
+
+    <div class="card">
+      <form id="quoteForm" novalidate>
+        <div class="fields">
+          <div class="fld"><label for="f-from">Loading port</label><input class="in" id="f-from" name="from" type="text" placeholder="Port or city" autocomplete="off" required><span class="err" id="e-from"></span></div>
+          <div class="fld"><label for="f-to">Discharge port</label><input class="in" id="f-to" name="to" type="text" placeholder="Port or city" autocomplete="off" required><span class="err" id="e-to"></span></div>
+          <div class="fld"><label for="f-cargo">Cargo</label>
+            <select class="in" id="f-cargo" name="cargo"><option>Full container</option><option>Part load</option><option>Refrigerated container</option><option>Not sure yet</option></select></div>
+          <div class="fld"><label for="f-size">Weight or volume</label><input class="in" id="f-size" name="size" type="text" placeholder="For example 12 t or 28 m³" autocomplete="off"></div>
+          <div class="fld full"><label for="f-email">Work email</label><input class="in" id="f-email" name="email" type="email" placeholder="you@company.com" autocomplete="email" required><span class="err" id="e-email"></span></div>
+          <div class="fld full"><label for="f-note">Anything the agent should know</label><textarea class="in" id="f-note" name="note" placeholder="Dates, hazardous goods, a deadline"></textarea></div>
+        </div>
+        <div class="form-foot">
+          <p>This prepares your request as an email. Nothing is sent from this page.</p>
+          <button class="btn btn-primary" type="submit">Prepare my request <svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
+        </div>
+      </form>
+
+      <div class="sent" id="sent" hidden>
+        <span class="check" id="check" data-state="out" aria-hidden="true"><svg viewBox="0 0 56 56" width="56" height="56" fill="none"><circle cx="28" cy="28" r="26" stroke="#6FD0B4" stroke-opacity=".5" stroke-width="1.5"/><path class="cp" d="M17 29.5l8 8L40 20" stroke="#6FD0B4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <h3>Your request is ready.</h3>
+        <p>Copy it into an email to <strong>hello@cargoagents.si</strong>. This page does not send anything by itself.</p>
+        <label class="sr" for="draft">Drafted request</label>
+        <textarea class="draft" id="draft" readonly></textarea>
+        <div class="sent-actions">
+          <button class="btn btn-primary" id="copy" type="button"><span class="copy-lab"><span class="a">Copy request</span><span class="b">Copied</span></span></button>
+          <a class="btn btn-ghost" id="mail" href="mailto:hello@cargoagents.si">Open in email app</a>
+          <button class="btn-text" id="edit" type="button">Edit request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-cols">
+    <div class="foot-brand">
+      <a class="brand" href="#top" aria-label="Cargo Agents home"><svg width="40" height="40" aria-hidden="true"><use href="#i-mark"/></svg><span>Cargo Agents</span></a>
+      <p>Sea freight for anyone shipping a container or part of one, with customs handled.</p>
+      <div class="foot-addr">[Street and number]<br>[Postcode City], [Country]<br><a href="mailto:hello@cargoagents.si">hello@cargoagents.si</a></div>
+    </div>
+    <nav class="foot-col" aria-label="Services"><h3>Services</h3><ul><li><a href="#modes">Full container</a></li><li><a href="#modes">Part load</a></li><li><a href="#modes">Refrigerated</a></li><li><a href="#story">Customs clearance</a></li></ul></nav>
+    <nav class="foot-col" aria-label="Product"><h3>The agent</h3><ul><li><a href="#story">How it works</a></li><li><a href="#agent">Example run</a></li><li><a href="#quote">Request a quote</a></li></ul></nav>
+    <nav class="foot-col" aria-label="Company"><h3>Company</h3><ul><li><a href="#">About us</a></li><li><a href="#">Careers</a></li><li><a href="#quote">Contact</a></li></ul></nav>
+  </div>
+  <div class="foot-scene">
+<svg viewBox="0 0 1440 460" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
+<defs>
+<linearGradient id="f-horizon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B4863" stop-opacity="0"/><stop offset="1" stop-color="#1F5272" stop-opacity="0.95"/></linearGradient>
+<linearGradient id="f-skyfade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="1"/></linearGradient>
+<mask id="f-skym"><rect x="0" y="0" width="1440" height="300" fill="url(#f-skyfade)"/></mask>
+<pattern id="f-skyl" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0.5H8" stroke="#CFE3EE" stroke-opacity="0.17"/></pattern>
+<pattern id="f-skyl2" width="8" height="4" patternUnits="userSpaceOnUse"><path d="M0 0.5H8" stroke="#CFE3EE" stroke-opacity="0.12"/></pattern>
+<radialGradient id="f-moonGlow"><stop offset="0" stop-color="#CFE3EE" stop-opacity="0.32"/><stop offset="1" stop-color="#CFE3EE" stop-opacity="0"/></radialGradient>
+<linearGradient id="f-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A4560"/><stop offset="1" stop-color="#08182A"/></linearGradient>
+<pattern id="f-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-40)"><path d="M0 0V5" stroke="#CFE3EE" stroke-width="0.7"/></pattern>
+<pattern id="f-truss" width="10" height="8" patternUnits="userSpaceOnUse"><path d="M0 8L5 0L10 8" fill="none" stroke="#CFE3EE" stroke-width="0.8"/></pattern>
+
+<g id="f-k"><rect x="0.5" y="0.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#CFE3EE" stroke-opacity="0.28"/></g>
+<g id="f-ko"><rect x="0.5" y="0.5" width="39" height="9" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.9"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#3A1606" stroke-opacity="0.35"/></g>
+<g id="f-kt"><rect x="0.5" y="0.5" width="39" height="9" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#CFE3EE" stroke-opacity="0.3"/></g>
+<g id="f-kg"><rect x="0.5" y="0.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#0A1A2A" stroke-opacity="0.35"/></g>
+
+<g id="f-sA"><use href="#f-k" y="-10"/><use href="#f-kg" y="-20"/><use href="#f-k" y="-30"/></g>
+<g id="f-sB"><use href="#f-k" y="-10"/><use href="#f-ko" y="-20"/><use href="#f-k" y="-30"/><use href="#f-k" y="-40"/></g>
+<g id="f-sC"><use href="#f-kt" y="-10"/><use href="#f-k" y="-20"/></g>
+<g id="f-sD"><use href="#f-kg" y="-10"/><use href="#f-k" y="-20"/><use href="#f-kt" y="-30"/><use href="#f-k" y="-40"/></g>
+<g id="f-sE"><use href="#f-ko" y="-10"/><use href="#f-k" y="-20"/><use href="#f-k" y="-30"/></g>
+<g id="f-sF"><use href="#f-k" y="-10"/></g>
+<g id="f-sG"><use href="#f-kt" y="-10"/><use href="#f-k" y="-20"/><use href="#f-kg" y="-30"/></g>
+
+<g id="f-crane" stroke="#CFE3EE" stroke-width="1.1" stroke-linejoin="round">
+<path d="M-5 0L5 0L2 -150L-4 -150Z" fill="#0C2539"/>
+<path d="M-71 0L-61 0L-64 -150L-70 -150Z" fill="#0C2539"/>
+<path d="M-3 0L-64 -75M-65 0L1 -75M-1 -75L-64 -150M-65 -75L2 -150" fill="none" stroke-opacity="0.6"/>
+<path d="M-71 -75H5M-70 -150H5" fill="none" stroke-opacity="0.8"/>
+<rect x="-76" y="-178" width="90" height="28" fill="#0C2539"/>
+<rect x="-32" y="-196" width="22" height="18" fill="#0C2539"/>
+<path d="M-28 -189H-14" stroke="#F5B56B" stroke-width="3"/>
+<rect x="-152" y="-176" width="76" height="8" fill="url(#f-truss)" stroke="none"/>
+<path d="M-152 -176H-76M-152 -168H-76" fill="none" stroke-opacity="0.7"/>
+<path d="M-21 -196V-224" fill="none"/>
+<path d="M-21 -224L-152 -176M-21 -224L158 -241" fill="none" stroke-opacity="0.6"/>
+<g transform="rotate(-24 4 -172)">
+<rect x="4" y="-176" width="170" height="8" fill="url(#f-truss)" stroke="none"/>
+<path d="M4 -176H174M4 -168H174" fill="none" stroke-opacity="0.8"/>
+</g>
+</g>
+</defs>
+
+<rect x="0" y="0" width="1440" height="300" fill="url(#f-horizon)"/>
+<rect x="0" y="0" width="1440" height="300" fill="url(#f-skyl)" mask="url(#f-skym)"/>
+<rect x="0" y="200" width="1440" height="100" fill="url(#f-skyl2)" mask="url(#f-skym)"/>
+
+<circle cx="1330" cy="118" r="80" fill="url(#f-moonGlow)"/>
+<circle cx="1330" cy="118" r="42" fill="#DCEAF2"/>
+<circle cx="1317" cy="108" r="9" fill="#0A1D2E" fill-opacity="0.1"/>
+<circle cx="1343" cy="130" r="6" fill="#0A1D2E" fill-opacity="0.1"/>
+<circle cx="1340" cy="102" r="4" fill="#0A1D2E" fill-opacity="0.08"/>
+<circle cx="1330" cy="118" r="48" fill="none" stroke="#CFE3EE" stroke-opacity="0.35"/>
+<circle cx="1330" cy="118" r="55" fill="none" stroke="#CFE3EE" stroke-opacity="0.18"/>
+<circle cx="1330" cy="118" r="64" fill="none" stroke="#CFE3EE" stroke-opacity="0.1"/>
+
+<path d="M-20 300V268C60 256 120 262 200 252C280 242 340 258 420 262C520 268 580 256 680 262C780 268 860 246 960 250C1060 254 1130 240 1230 246C1320 251 1380 242 1460 250V300Z" fill="#12324A" stroke="#CFE3EE" stroke-opacity="0.3"/>
+<path d="M-20 300V268C60 256 120 262 200 252C280 242 340 258 420 262C520 268 580 256 680 262C780 268 860 246 960 250C1060 254 1130 240 1230 246C1320 251 1380 242 1460 250V300Z" fill="url(#f-hatch)" opacity="0.22"/>
+<path d="M-20 300V240C50 228 110 236 180 224C250 212 320 230 380 244C440 258 500 270 560 282L640 300Z" fill="#0C2539" stroke="#CFE3EE" stroke-opacity="0.38"/>
+<path d="M-20 300V240C50 228 110 236 180 224C250 212 320 230 380 244C440 258 500 270 560 282L640 300Z" fill="url(#f-hatch)" opacity="0.3"/>
+<path d="M860 300C930 284 990 268 1070 262C1150 256 1230 262 1300 256C1360 252 1410 256 1460 262V300Z" fill="#0C2539" stroke="#CFE3EE" stroke-opacity="0.38"/>
+<path d="M860 300C930 284 990 268 1070 262C1150 256 1230 262 1300 256C1360 252 1410 256 1460 262V300Z" fill="url(#f-hatch)" opacity="0.3"/>
+
+<rect x="-20" y="300" width="1480" height="170" fill="url(#f-sea)"/>
+<path d="M-20 300H1460" stroke="#CFE3EE" stroke-opacity="0.35"/>
+
+<g fill="none" stroke="#CFE3EE" stroke-linecap="round">
+<path class="wv" style="--len:366" d="M0 312H1440" stroke-opacity="0.16" stroke-dasharray="70 18 22 26 140 30 40 20"/>
+<path class="wv2" style="--len:380" d="M0 322H1440" stroke-opacity="0.14" stroke-dasharray="30 24 90 16 50 28 120 22"/>
+<path class="wv" style="--len:272" d="M0 338H1440" stroke-opacity="0.12" stroke-dasharray="110 20 36 30 60 16"/>
+<path class="wv2" style="--len:270" d="M0 356H1440" stroke-opacity="0.12" stroke-dasharray="50 22 130 18 24 26"/>
+<path d="M0 378H1440" stroke-opacity="0.1" stroke-dasharray="90 26 40 20 150 24"/>
+<path d="M0 402H1440" stroke-opacity="0.08" stroke-dasharray="60 30 100 22"/>
+<path d="M0 428H1440" stroke-opacity="0.06" stroke-dasharray="140 40 50 30"/>
+</g>
+
+<path d="M1300 312H1360M1306 320H1354M1312 328H1348M1318 337H1342M1322 347H1338M1325 358H1335" stroke="#DCEAF2" stroke-opacity="0.5" stroke-width="1.6" stroke-linecap="round"/>
+
+<path d="M-20 296H570L612 352H-20Z" fill="#091B2B"/>
+<path d="M-20 296H570" stroke="#CFE3EE" stroke-opacity="0.3"/>
+<path d="M-20 306H575M-20 317H583" stroke="#CFE3EE" stroke-opacity="0.08"/>
+
+<g opacity="0.55">
+<use href="#f-sC" x="-4" y="312"/><use href="#f-sA" x="40" y="312"/><use href="#f-sF" x="84" y="312"/><use href="#f-sB" x="128" y="312"/><use href="#f-sC" x="172" y="312"/><use href="#f-sG" x="216" y="312"/><use href="#f-sA" x="260" y="312"/><use href="#f-sF" x="304" y="312"/><use href="#f-sE" x="348" y="312"/><use href="#f-sC" x="392" y="312"/><use href="#f-sA" x="436" y="312"/><use href="#f-sB" x="480" y="312"/><use href="#f-sF" x="524" y="312"/>
+</g>
+<g>
+<use href="#f-sA" x="18" y="326"/><use href="#f-sE" x="62" y="326"/><use href="#f-sC" x="106" y="326"/><use href="#f-sD" x="150" y="326"/><use href="#f-sF" x="194" y="326"/><use href="#f-sB" x="238" y="326"/><use href="#f-sG" x="282" y="326"/><use href="#f-sC" x="326" y="326"/><use href="#f-sA" x="370" y="326"/><use href="#f-sD" x="414" y="326"/><use href="#f-sE" x="458" y="326"/><use href="#f-sF" x="502" y="326"/><use href="#f-sC" x="546" y="326"/>
+</g>
+
+<use href="#f-crane" transform="translate(150 322) scale(0.72)" opacity="0.65"/>
+<use href="#f-crane" transform="translate(330 326) scale(0.85)" opacity="0.82"/>
+<use href="#f-crane" transform="translate(520 330)"/>
+
+<path d="M-20 330H595L612 352H-20Z" fill="#0B2236"/>
+<path d="M-20 330H595L612 352H-20Z" fill="url(#f-hatch)" opacity="0.4"/>
+<path d="M-20 330H595" stroke="#CFE3EE" stroke-opacity="0.7"/>
+<path d="M30 331V351M110 331V351M190 331V351M270 331V351M350 331V351M430 331V351M510 331V351" stroke="#CFE3EE" stroke-opacity="0.25"/>
+<path d="M64 330v-6h8v6zM224 330v-6h8v6zM384 330v-6h8v6zM544 330v-6h8v6z" fill="#CFE3EE" fill-opacity="0.6"/>
+
+<g fill="none" stroke="#CFE3EE" stroke-linecap="round">
+<path d="M690 334C664 335 640 338 622 342" stroke-opacity="0.3" stroke-dasharray="14 8 6 8"/>
+<path d="M704 341C676 344 652 349 632 355" stroke-opacity="0.22" stroke-dasharray="10 8 4 8"/>
+<path d="M740 354H1210" stroke-opacity="0.28" stroke-dasharray="60 10 140 8 30 12 90 10"/>
+<path d="M760 362H1190" stroke-opacity="0.2" stroke-dasharray="40 14 100 12 60 10"/>
+<path d="M790 372H1160" stroke-opacity="0.14" stroke-dasharray="30 16 80 14 50 12"/>
+<path d="M830 384H1120" stroke-opacity="0.09" stroke-dasharray="20 18 60 16"/>
+</g>
+<path d="M726 352V372M738 352V366M750 352V360" stroke="#F5B56B" stroke-opacity="0.35" stroke-linecap="round"/>
+
+<g class="fship">
+<path d="M692 298H1198C1222 298 1240 288 1254 270L1234 330H714Z" fill="#0B2236" stroke="#CFE3EE" stroke-opacity="0.85" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M692 298H1198C1222 298 1240 288 1254 270L1234 330H714Z" fill="url(#f-hatch)" opacity="0.2"/>
+<path d="M714 330H1234L1227 345H723Z" fill="#B5502A" fill-opacity="0.9"/>
+<path d="M701 306H1238" stroke="#CFE3EE" stroke-opacity="0.35"/>
+<text x="905" y="322" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="3" fill="#CFE3EE" fill-opacity="0.5">CARGOAGENTS.SI</text>
+
+<rect x="718" y="262" width="60" height="36" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="726" y="244" width="44" height="18" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="720" y="236" width="58" height="9" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<path d="M724 240.5H774" stroke="#F5B56B" stroke-width="3" stroke-dasharray="5 3"/>
+<path d="M724 252H766M724 270H772M724 281H772" stroke="#F5B56B" stroke-opacity="0.7" stroke-width="2" stroke-dasharray="3 5"/>
+<rect x="746" y="216" width="14" height="22" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="746" y="222" width="14" height="6" fill="#E8793A"/>
+<path d="M736 236V206M729 212H743" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<path d="M1212 298V280" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<circle cx="1212" cy="279" r="1.6" fill="#EAF3F8"/>
+
+<use href="#f-sA" x="792" y="298"/><use href="#f-sB" x="834" y="298"/><use href="#f-sD" x="876" y="298"/><use href="#f-sA" x="918" y="298"/><use href="#f-sB" x="960" y="298"/><use href="#f-sD" x="1002" y="298"/><use href="#f-sG" x="1044" y="298"/><use href="#f-sC" x="1086" y="298"/><use href="#f-sE" x="1128" y="298"/>
+</g>
+
+<g class="gull" style="animation-duration:15s"><path d="M880 150q7-8 14 0q7-8 14 0" fill="none" stroke="#DCEAF2" stroke-width="1.4" stroke-linecap="round"/></g>
+<g class="gull" style="animation-duration:19s;animation-delay:-6s"><path d="M934 178q5-6 10 0q5-6 10 0" fill="none" stroke="#DCEAF2" stroke-width="1.2" stroke-linecap="round"/></g>
+<g class="gull" style="animation-duration:13s;animation-delay:-3s"><path d="M832 190q4-5 8 0q4-5 8 0" fill="none" stroke="#DCEAF2" stroke-width="1" stroke-linecap="round"/></g>
+
+<circle class="bl" cx="499" cy="103" r="1.9" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-1.3s" cx="680" cy="86" r="1.9" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-0.6s" cx="312" cy="133" r="1.7" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-1.9s" cx="466" cy="119" r="1.7" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-2.2s" cx="135" cy="159" r="1.5" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-0.3s" cx="265" cy="146" r="1.5" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-1s" cx="736" cy="205" r="1.8" fill="#FF5A4A"/>
+</svg>
+    <div class="legal"><div class="wrap"><div><span>© 2026 Cargo Agents · [Registered company name, reg. no., VAT ID]</span><nav aria-label="Legal"><a href="#">Privacy policy</a><a href="#">Terms of service</a><a href="#">Cookie settings</a></nav></div></div></div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
+  var num = function (n, fb) { var v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n)); return isFinite(v) ? v : fb; };
+
+  /* ---------- words: split a node's text into spans ---------- */
+  function splitWords(el, cls) {
+    var out = [];
+    Array.prototype.slice.call(el.childNodes).forEach(function (n) {
+      if (n.nodeType === 3) {
+        var frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(function (p) {
+          if (!p) return;
+          if (/^\s+$/.test(p)) { frag.appendChild(document.createTextNode(p)); return; }
+          var s = document.createElement('span'); s.className = cls; s.textContent = p; frag.appendChild(s); out.push(s);
+        });
+        el.replaceChild(frag, n);
+      } else if (n.nodeType === 1) { out = out.concat(splitWords(n, cls)); }
+    });
+    return out;
+  }
+
+  /* ---------- agent console (streaming text + icon swap) ---------- */
+  var log = $('#log'), decide = $('#decide'), runId = 0;
+  var baseLines = $$('li[data-base]', log);
+  var lineWords = new Map();
+  baseLines.forEach(function (li) { lineWords.set(li, splitWords($('.tx', li), 'w-i is-in')); });
+  var iconHTML = '<span class="st" aria-hidden="true"><svg class="ic-pend"><use href="#i-pend"/></svg><svg class="ic-done"><use href="#i-done"/></svg></span>';
+
+  function wipeWords(words) { words.forEach(function (s) { s.style.transition = 'none'; s.classList.remove('is-in'); }); }
+  function restoreWords(words) { words.forEach(function (s) { s.style.transition = ''; }); }
+  async function streamLine(li, words, id) {
+    for (var i = 0; i < words.length; i++) {
+      if (id !== runId) return false;
+      words[i].classList.add('is-in');
+      await sleep(num('--stream-gap', 45));
+    }
+    await sleep(320);
+    return id === runId;
+  }
+  function addLine(text) {
+    var li = document.createElement('li');
+    li.innerHTML = iconHTML + '<span class="tx"></span>';
+    $('.tx', li).textContent = text;
+    log.appendChild(li);
+    var words = splitWords($('.tx', li), 'w-i');
+    lineWords.set(li, words);
+    return { li: li, words: words };
+  }
+  async function playRun() {
+    var id = ++runId;
+    $$('li:not([data-base])', log).forEach(function (li) { lineWords.delete(li); li.remove(); });
+    decide.classList.remove('is-on');
+    if (rm.matches) { baseLines.forEach(function (li) { li.classList.add('is-done'); li.classList.remove('is-wait'); }); finishWait(); return; }
+    baseLines.forEach(function (li) { li.classList.remove('is-done', 'is-wait'); wipeWords(lineWords.get(li)); });
+    void log.offsetWidth;
+    baseLines.forEach(function (li) { restoreWords(lineWords.get(li)); });
+    for (var k = 0; k < baseLines.length; k++) {
+      var li = baseLines[k], last = li.hasAttribute('data-last');
+      if (last) li.classList.add('is-wait');
+      var ok = await streamLine(li, lineWords.get(li), id);
+      if (!ok) return;
+      if (!last) li.classList.add('is-done');
+    }
+    finishWait();
+  }
+  function finishWait() { decide.classList.add('is-on'); }
+  async function pick(kind) {
+    var id = ++runId, last = $('li[data-last]', log);
+    decide.classList.remove('is-on');
+    last.classList.remove('is-wait'); last.classList.add('is-done');
+    var texts = [
+      'Booked the ' + (kind === 'direct' ? 'direct' : 'cheaper') + ' sailing and filed the export entry.',
+      'Tracking started. I will message you at each port call.'
+    ];
+    for (var i = 0; i < texts.length; i++) {
+      var o = addLine(texts[i]);
+      if (!rm.matches) { wipeWords(o.words); void o.li.offsetWidth; restoreWords(o.words); await sleep(60); var ok = await streamLine(o.li, o.words, id); if (!ok) return; }
+      o.words.forEach(function (s) { s.classList.add('is-in'); });
+      o.li.classList.add('is-done');
+    }
+  }
+  $('#replay').addEventListener('click', playRun);
+  $$('.chip', decide).forEach(function (b) { b.addEventListener('click', function () { pick(b.getAttribute('data-pick')); }); });
+  if ('IntersectionObserver' in window) {
+    var seen = false;
+    new IntersectionObserver(function (es, ob) {
+      es.forEach(function (e) { if (e.isIntersecting && !seen) { seen = true; ob.disconnect(); playRun(); } });
+    }, { threshold: 0.55 }).observe($('#term'));
+  }
+
+  /* ---------- mode tabs (sliding pill + panel swap) ---------- */
+  var bar = $('#tabs'), pill = $('.tabs-pill', bar), tabs = $$('.tab', bar), panels = $$('.panel');
+  function movePill(tab, animate) {
+    var prev = pill.style.transition;
+    if (!animate) pill.style.transition = 'none';
+    pill.style.transform = 'translateX(' + tab.offsetLeft + 'px)';
+    pill.style.width = tab.offsetWidth + 'px';
+    if (!animate) { void pill.offsetWidth; pill.style.transition = prev; }
+  }
+  function activeTab() { return tabs.filter(function (t) { return t.getAttribute('aria-selected') === 'true'; })[0] || tabs[0]; }
+  function selectTab(tab, focus) {
+    tabs.forEach(function (t) { var on = t === tab; t.setAttribute('aria-selected', on ? 'true' : 'false'); t.tabIndex = on ? 0 : -1; });
+    panels.forEach(function (p) { p.classList.toggle('is-on', p.id === tab.getAttribute('aria-controls')); });
+    movePill(tab, true);
+    if (focus) tab.focus();
+  }
+  tabs.forEach(function (t, i) {
+    t.addEventListener('click', function () { selectTab(t, false); });
+    t.addEventListener('keydown', function (e) {
+      var k = e.key, j = -1;
+      if (k === 'ArrowRight') j = (i + 1) % tabs.length;
+      else if (k === 'ArrowLeft') j = (i - 1 + tabs.length) % tabs.length;
+      else if (k === 'Home') j = 0; else if (k === 'End') j = tabs.length - 1;
+      if (j > -1) { e.preventDefault(); selectTab(tabs[j], true); }
+    });
+  });
+  requestAnimationFrame(function () { movePill(activeTab(), false); });
+  window.addEventListener('resize', function () { movePill(activeTab(), false); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { movePill(activeTab(), false); });
+
+  /* ---------- quote form ---------- */
+  var form = $('#quoteForm'), sent = $('#sent'), draft = $('#draft'), check = $('#check');
+  var rules = { from: 'Add the loading port.', to: 'Add the discharge port.', email: 'Add an email so the agent can reply.' };
+  function setErr(name, msg) {
+    var fld = $('#f-' + name).closest('.fld'), err = $('#e-' + name);
+    err.textContent = msg || '';
+    fld.classList.toggle('is-error', !!msg);
+    $('#f-' + name).setAttribute('aria-invalid', msg ? 'true' : 'false');
+    if (msg) { fld.classList.remove('is-shaking'); void fld.offsetWidth; fld.classList.add('is-shaking'); }
+  }
+  ['from', 'to', 'email'].forEach(function (n) { $('#f-' + n).addEventListener('input', function () { if ($('#f-' + n).value.trim()) setErr(n, ''); }); });
+  function valid() {
+    var bad = null;
+    ['from', 'to', 'email'].forEach(function (n) {
+      var el = $('#f-' + n), v = el.value.trim(), msg = '';
+      if (!v) msg = rules[n];
+      else if (n === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) msg = 'That email looks incomplete.';
+      setErr(n, msg);
+      if (msg && !bad) bad = el;
+    });
+    if (bad) bad.focus();
+    return !bad;
+  }
+  function compose() {
+    var v = function (id) { return $('#f-' + id).value.trim(); };
+    var lines = ['Quote request', '', 'Loading port: ' + v('from'), 'Discharge port: ' + v('to'), 'Cargo: ' + $('#f-cargo').value];
+    if (v('size')) lines.push('Weight or volume: ' + v('size'));
+    lines.push('Reply to: ' + v('email'));
+    if (v('note')) lines.push('', 'Notes: ' + v('note'));
+    return lines.join('\n');
+  }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!valid()) return;
+    var text = compose();
+    draft.value = text;
+    $('#mail').setAttribute('href', 'mailto:hello@cargoagents.si?subject=' + encodeURIComponent('Quote request') + '&body=' + encodeURIComponent(text));
+    form.hidden = true; sent.hidden = false;
+    check.setAttribute('data-state', 'out'); void check.offsetWidth; check.setAttribute('data-state', 'in');
+    sent.scrollIntoView({ block: 'nearest', behavior: rm.matches ? 'auto' : 'smooth' });
+  });
+  $('#edit').addEventListener('click', function () { sent.hidden = true; form.hidden = false; $('#f-from').focus(); });
+  var copyBtn = $('#copy'), copyTimer;
+  copyBtn.addEventListener('click', function () {
+    var done = function () { copyBtn.classList.add('is-copied'); clearTimeout(copyTimer); copyTimer = setTimeout(function () { copyBtn.classList.remove('is-copied'); }, 1800); };
+    var fallback = function () { draft.focus(); draft.select(); try { if (document.execCommand('copy')) done(); } catch (err) {} };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(draft.value).then(done, fallback); else fallback();
+  });
+
+  /* ---------- scroll: parallax, manifesto, pinned route ---------- */
+  var path = $('#route'), marker = $('#marker'), nodes = $$('.node'), steps = $$('.step'), story = $('#story');
+  var pathLen = path.getTotalLength();
+  function setRoute(p) {
+    var pt = path.getPointAtLength(Math.max(0.001, p * pathLen));
+    marker.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ')');
+    nodes.forEach(function (n, i) { n.classList.toggle('is-lit', p >= i / 4 - 0.01); });
+    var idx = Math.min(steps.length - 1, Math.floor(p * steps.length));
+    steps.forEach(function (s, i) { s.classList.toggle('is-active', i === idx); });
+  }
+  function staticStory() {
+    story.classList.add('is-static');
+    marker.setAttribute('transform', 'translate(330 148)');
+    nodes.forEach(function (n) { n.classList.add('is-lit'); });
+    steps.forEach(function (s) { s.classList.remove('is-active'); });
+  }
+
+  var manifesto = $('#manifesto'), mWords = splitWords(manifesto, 'w');
+
+  if (window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+    var mm = gsap.matchMedia();
+
+    mm.add('(prefers-reduced-motion: no-preference)', function () {
+      /* hero: a descent. The sky barely moves, the astrolabe drifts and swells,
+         the quay and ship sweep past faster than the page. Four depths, four speeds. */
+      var hero = { trigger: '#top', start: 'top top', end: 'bottom top', scrub: 0.6 };
+      gsap.to('#pxFar', { y: 520, ease: 'none', scrollTrigger: hero });
+      gsap.to('#pxRays', { y: 330, rotation: 18, svgOrigin: '720 640', ease: 'none', scrollTrigger: hero });
+      gsap.to('#pxMid', { y: 330, scale: 1.25, svgOrigin: '720 640', ease: 'none', scrollTrigger: hero });
+      gsap.to('#pxNear', { y: -430, ease: 'none', scrollTrigger: hero });
+      gsap.to('#heroCopy', { y: -110, scale: 0.93, opacity: 0, transformOrigin: '50% 30%', ease: 'none', scrollTrigger: { trigger: '#top', start: '4% top', end: '40% top', scrub: true } });
+      gsap.to('.hero-foot', { opacity: 0, ease: 'none', scrollTrigger: { trigger: '#top', start: 'top top', end: '14% top', scrub: true } });
+
+      /* manifesto: words light up as you read */
+      gsap.to(mWords, {
+        color: function (i, el) { return el.closest('em') ? '#F0803C' : '#EAF3F8'; },
+        ease: 'none', stagger: 0.12, duration: 0.5,
+        scrollTrigger: { trigger: manifesto, start: 'top 82%', end: 'bottom 52%', scrub: true }
+      });
+
+      /* route story: pin the section and draw the route with the scroll */
+      story.classList.remove('is-static');
+      gsap.set(path, { strokeDasharray: pathLen, strokeDashoffset: pathLen });
+      setRoute(0);
+      var tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: '#storyPin', start: 'top top', end: function () { return '+=' + Math.round(window.innerHeight * 2.8); },
+          pin: true, scrub: 0.5, anticipatePin: 1, invalidateOnRefresh: true
+        },
+        onUpdate: function () { setRoute(tl.progress()); }
+      });
+      tl.to(path, { strokeDashoffset: 0, ease: 'none', duration: 1 });
+      return function () { gsap.set(path, { clearProps: 'strokeDasharray,strokeDashoffset' }); };
+    });
+
+    mm.add('(prefers-reduced-motion: reduce)', function () {
+      mWords.forEach(function (w) { w.style.color = w.closest('em') ? '#F0803C' : '#EAF3F8'; });
+      staticStory();
+    });
+
+    /* pointer depth: the same four layers lean toward the cursor by different amounts */
+    mm.add('(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)', function () {
+      var layers = $$('#heroSvg .pt').map(function (g) {
+        return { d: parseFloat(g.getAttribute('data-d')) || 1,
+                 x: gsap.quickTo(g, 'x', { duration: 1.2, ease: 'power3.out' }),
+                 y: gsap.quickTo(g, 'y', { duration: 1.2, ease: 'power3.out' }) };
+      });
+      function onMove(e) {
+        if (window.scrollY > window.innerHeight * 1.4) return;
+        var nx = (e.clientX / window.innerWidth - 0.5) * 2, ny = (e.clientY / window.innerHeight - 0.5) * 2;
+        layers.forEach(function (l) { l.x(-nx * 11 * l.d); l.y(-ny * 6 * l.d); });
+      }
+      window.addEventListener('pointermove', onMove, { passive: true });
+      return function () { window.removeEventListener('pointermove', onMove); gsap.set('#heroSvg .pt', { clearProps: 'transform' }); };
+    });
+
+    var refresh = function () { ScrollTrigger.refresh(); };
+    window.addEventListener('load', refresh);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+  } else {
+    mWords.forEach(function (w) { w.style.color = w.closest('em') ? '#F0803C' : '#EAF3F8'; });
+    staticStory();
+  }
+})();
+</script>

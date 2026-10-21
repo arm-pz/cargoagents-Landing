@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cargo Agents footer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600&family=Instrument+Serif&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050F19}
+a{color:#DCE9F2;text-decoration:none}
+a:hover{color:#FFFFFF;text-decoration:underline;text-decoration-color:#F0803C;text-decoration-thickness:1.5px;text-underline-offset:4px}
+a:focus-visible{outline:2px solid #F0803C;outline-offset:3px;border-radius:4px}
+.sub{color:#9DB5C5}
+.sub:hover{color:#FFFFFF}
+.cta:hover{background:#FF9A5C;color:#08182A;text-decoration:none}
+.ghost:hover{border-color:#CFE3EE;color:#FFFFFF;text-decoration:none}
+@keyframes drift {
+  to { stroke-dashoffset: calc(var(--len) * -1); }
+}
+@keyframes bob {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-1.5px); }
+  100% { transform: translateY(0); }
+}
+@keyframes glide {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(30px); }
+  100% { transform: translateX(0); }
+}
+@keyframes blink {
+  0% { opacity: 1; }
+  55% { opacity: 1; }
+  62% { opacity: 0.12; }
+  100% { opacity: 0.12; }
+}
+.wv{animation:drift 70s linear infinite}
+.wv2{animation:drift 95s linear infinite reverse}
+.ship{animation:bob 8s ease-in-out infinite}
+.gull{animation:glide 16s ease-in-out infinite}
+.bl{animation:blink 2.6s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce) {
+  .wv,.wv2,.ship,.gull,.bl{animation:none}
+}
+</style>
+</helmet>
+
+<div style="position:relative;width:100%;overflow:hidden;background:linear-gradient(180deg,#050F19 0%,#0A1D2E 60%,#10293E 100%);color:#DCE9F2;font-family:'Inter Tight',system-ui,sans-serif">
+
+<div aria-hidden="true" style="position:absolute;left:0;right:0;top:0;height:60%;pointer-events:none;opacity:0.55;background-image:radial-gradient(1.1px 1.1px at 6% 14%,#DCEAF2,transparent 100%),radial-gradient(1px 1px at 15% 31%,#DCEAF2,transparent 100%),radial-gradient(1.2px 1.2px at 27% 9%,#DCEAF2,transparent 100%),radial-gradient(1px 1px at 41% 24%,#DCEAF2,transparent 100%),radial-gradient(1.1px 1.1px at 53% 6%,#DCEAF2,transparent 100%),radial-gradient(1px 1px at 66% 19%,#DCEAF2,transparent 100%),radial-gradient(1.2px 1.2px at 78% 8%,#DCEAF2,transparent 100%),radial-gradient(1px 1px at 88% 27%,#DCEAF2,transparent 100%),radial-gradient(1.1px 1.1px at 95% 11%,#DCEAF2,transparent 100%)"></div>
+
+<div style="position:relative;z-index:2;max-width:1280px;margin:0 auto;padding:88px clamp(20px,4vw,40px) 0">
+
+<div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:28px 32px">
+<div>
+<p style="margin:0 0 16px;font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;text-transform:uppercase;color:#F0803C">Freight forwarding</p>
+<h2 style="margin:0;font:400 clamp(36px,4.2vw,58px)/1.02 'Instrument Serif',serif;letter-spacing:-0.01em;color:#EAF3F8;max-width:720px">Tell us where it needs to be.</h2>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px">
+<a class="cta" href="#" style="display:inline-flex;align-items:center;gap:10px;padding:16px 26px;border-radius:999px;background:#F0803C;color:#08182A;font:600 15px/1 'Inter Tight',sans-serif">Request a quote <span aria-hidden="true">→</span></a>
+<a class="ghost" href="#" style="display:inline-flex;align-items:center;padding:15px 24px;border-radius:999px;border:1px solid rgba(207,227,238,0.4);color:#EAF3F8;font:500 15px/1 'Inter Tight',sans-serif">Track a shipment</a>
+</div>
+</div>
+
+<div style="height:1px;background:rgba(207,227,238,0.16);margin:44px 0"></div>
+
+<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:48px 64px">
+
+<div style="flex:1 1 300px;max-width:360px;display:flex;flex-direction:column;gap:20px">
+<a href="#" aria-label="Cargo Agents home" style="display:inline-flex;align-items:center;gap:12px;text-decoration:none">
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+<rect x="0.75" y="0.75" width="38.5" height="38.5" rx="9" stroke="#CFE3EE" stroke-opacity="0.5" stroke-width="1.5"/>
+<rect x="9" y="10" width="10" height="6" stroke="#CFE3EE" stroke-width="1.5"/>
+<rect x="21" y="10" width="10" height="6" fill="#F0803C"/>
+<rect x="9" y="18" width="6" height="6" stroke="#CFE3EE" stroke-width="1.5"/>
+<rect x="17" y="18" width="6" height="6" stroke="#CFE3EE" stroke-width="1.5"/>
+<rect x="25" y="18" width="6" height="6" stroke="#CFE3EE" stroke-width="1.5"/>
+<path d="M8 31q3-3 6 0t6 0t6 0t6 0" stroke="#CFE3EE" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
+<span style="font:400 30px/1 'Instrument Serif',serif;color:#EAF3F8">Cargo Agents</span>
+</a>
+<p style="margin:0;max-width:320px;font:400 15px/1.6 'Inter Tight',sans-serif;color:#A9C0CF">Sea, road, rail and air freight, with customs handled.</p>
+<address style="font-style:normal;font:400 13px/1.8 'IBM Plex Mono',monospace;color:#9DB5C5">
+[Street and number]<br>[Postcode City], [Country]<br><a class="sub" href="mailto:hello@cargoagents.si">hello@cargoagents.si</a><br>[Phone number]
+</address>
+</div>
+
+<nav aria-label="Footer" style="flex:3 1 560px;display:flex;flex-wrap:wrap;gap:40px 24px">
+
+<div style="flex:1 1 130px;min-width:120px">
+<h3 style="margin:0 0 20px;font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;text-transform:uppercase;color:#7FA6BC">Services</h3>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;font:400 15px/1.3 'Inter Tight',sans-serif">
+<li><a href="#">Sea freight</a></li>
+<li><a href="#">Air freight</a></li>
+<li><a href="#">Road and rail</a></li>
+<li><a href="#">Customs clearance</a></li>
+<li><a href="#">Warehousing</a></li>
+<li><a href="#">Project cargo</a></li>
+</ul>
+</div>
+
+<div style="flex:1 1 130px;min-width:120px">
+<h3 style="margin:0 0 20px;font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;text-transform:uppercase;color:#7FA6BC">Ports and lanes</h3>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;font:400 15px/1.3 'Inter Tight',sans-serif">
+<li><a href="#">Mediterranean</a></li>
+<li><a href="#">Northern Europe</a></li>
+<li><a href="#">Middle East</a></li>
+<li><a href="#">Far East</a></li>
+<li><a href="#">Americas</a></li>
+</ul>
+</div>
+
+<div style="flex:1 1 130px;min-width:120px">
+<h3 style="margin:0 0 20px;font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;text-transform:uppercase;color:#7FA6BC">Resources</h3>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;font:400 15px/1.3 'Inter Tight',sans-serif">
+<li><a href="#">Track a shipment</a></li>
+<li><a href="#">Request a quote</a></li>
+<li><a href="#">Incoterms guide</a></li>
+<li><a href="#">Documents and forms</a></li>
+<li><a href="#">FAQ</a></li>
+</ul>
+</div>
+
+<div style="flex:1 1 130px;min-width:120px">
+<h3 style="margin:0 0 20px;font:500 12px/1 'IBM Plex Mono',monospace;letter-spacing:0.14em;text-transform:uppercase;color:#7FA6BC">Company</h3>
+<ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;font:400 15px/1.3 'Inter Tight',sans-serif">
+<li><a href="#">About us</a></li>
+<li><a href="#">Team</a></li>
+<li><a href="#">Careers</a></li>
+<li><a href="#">News</a></li>
+<li><a href="#">Contact</a></li>
+<li><a href="#">LinkedIn ↗</a></li>
+</ul>
+</div>
+
+</nav>
+</div>
+
+<div style="height:24px"></div>
+</div>
+
+<div style="position:relative;z-index:1;width:100%;aspect-ratio:1440/460;min-height:480px">
+
+<svg viewBox="0 0 1440 460" preserveAspectRatio="xMidYMax slice" aria-hidden="true" style="position:absolute;left:0;top:0;width:100%;height:100%;display:block">
+<defs>
+<linearGradient id="horizon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B4863" stop-opacity="0"/><stop offset="1" stop-color="#1F5272" stop-opacity="0.95"/></linearGradient>
+<linearGradient id="skyfade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="1"/></linearGradient>
+<mask id="skym"><rect x="0" y="0" width="1440" height="300" fill="url(#skyfade)"/></mask>
+<pattern id="skyl" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M0 0.5H8" stroke="#CFE3EE" stroke-opacity="0.17"/></pattern>
+<pattern id="skyl2" width="8" height="4" patternUnits="userSpaceOnUse"><path d="M0 0.5H8" stroke="#CFE3EE" stroke-opacity="0.12"/></pattern>
+<radialGradient id="moonGlow"><stop offset="0" stop-color="#CFE3EE" stop-opacity="0.32"/><stop offset="1" stop-color="#CFE3EE" stop-opacity="0"/></radialGradient>
+<linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A4560"/><stop offset="1" stop-color="#08182A"/></linearGradient>
+<pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(-40)"><path d="M0 0V5" stroke="#CFE3EE" stroke-width="0.7"/></pattern>
+<pattern id="truss" width="10" height="8" patternUnits="userSpaceOnUse"><path d="M0 8L5 0L10 8" fill="none" stroke="#CFE3EE" stroke-width="0.8"/></pattern>
+
+<g id="k"><rect x="0.5" y="0.5" width="39" height="9" fill="#10304A" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#CFE3EE" stroke-opacity="0.28"/></g>
+<g id="ko"><rect x="0.5" y="0.5" width="39" height="9" fill="#C8602A" stroke="#F4B08A" stroke-opacity="0.9"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#3A1606" stroke-opacity="0.35"/></g>
+<g id="kt"><rect x="0.5" y="0.5" width="39" height="9" fill="#1D6574" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#CFE3EE" stroke-opacity="0.3"/></g>
+<g id="kg"><rect x="0.5" y="0.5" width="39" height="9" fill="#58798F" stroke="#CFE3EE" stroke-opacity="0.75"/><path d="M5 1.5V8.5M10 1.5V8.5M15 1.5V8.5M20 1.5V8.5M25 1.5V8.5M30 1.5V8.5M35 1.5V8.5" stroke="#0A1A2A" stroke-opacity="0.35"/></g>
+
+<g id="sA"><use href="#k" y="-10"/><use href="#kg" y="-20"/><use href="#k" y="-30"/></g>
+<g id="sB"><use href="#k" y="-10"/><use href="#ko" y="-20"/><use href="#k" y="-30"/><use href="#k" y="-40"/></g>
+<g id="sC"><use href="#kt" y="-10"/><use href="#k" y="-20"/></g>
+<g id="sD"><use href="#kg" y="-10"/><use href="#k" y="-20"/><use href="#kt" y="-30"/><use href="#k" y="-40"/></g>
+<g id="sE"><use href="#ko" y="-10"/><use href="#k" y="-20"/><use href="#k" y="-30"/></g>
+<g id="sF"><use href="#k" y="-10"/></g>
+<g id="sG"><use href="#kt" y="-10"/><use href="#k" y="-20"/><use href="#kg" y="-30"/></g>
+
+<g id="crane" stroke="#CFE3EE" stroke-width="1.1" stroke-linejoin="round">
+<path d="M-5 0L5 0L2 -150L-4 -150Z" fill="#0C2539"/>
+<path d="M-71 0L-61 0L-64 -150L-70 -150Z" fill="#0C2539"/>
+<path d="M-3 0L-64 -75M-65 0L1 -75M-1 -75L-64 -150M-65 -75L2 -150" fill="none" stroke-opacity="0.6"/>
+<path d="M-71 -75H5M-70 -150H5" fill="none" stroke-opacity="0.8"/>
+<rect x="-76" y="-178" width="90" height="28" fill="#0C2539"/>
+<rect x="-32" y="-196" width="22" height="18" fill="#0C2539"/>
+<path d="M-28 -189H-14" stroke="#F5B56B" stroke-width="3"/>
+<rect x="-152" y="-176" width="76" height="8" fill="url(#truss)" stroke="none"/>
+<path d="M-152 -176H-76M-152 -168H-76" fill="none" stroke-opacity="0.7"/>
+<path d="M-21 -196V-224" fill="none"/>
+<path d="M-21 -224L-152 -176M-21 -224L158 -241" fill="none" stroke-opacity="0.6"/>
+<g transform="rotate(-24 4 -172)">
+<rect x="4" y="-176" width="170" height="8" fill="url(#truss)" stroke="none"/>
+<path d="M4 -176H174M4 -168H174" fill="none" stroke-opacity="0.8"/>
+</g>
+</g>
+</defs>
+
+<rect x="0" y="0" width="1440" height="300" fill="url(#horizon)"/>
+<rect x="0" y="0" width="1440" height="300" fill="url(#skyl)" mask="url(#skym)"/>
+<rect x="0" y="200" width="1440" height="100" fill="url(#skyl2)" mask="url(#skym)"/>
+
+<circle cx="1330" cy="118" r="80" fill="url(#moonGlow)"/>
+<circle cx="1330" cy="118" r="42" fill="#DCEAF2"/>
+<circle cx="1317" cy="108" r="9" fill="#0A1D2E" fill-opacity="0.1"/>
+<circle cx="1343" cy="130" r="6" fill="#0A1D2E" fill-opacity="0.1"/>
+<circle cx="1340" cy="102" r="4" fill="#0A1D2E" fill-opacity="0.08"/>
+<circle cx="1330" cy="118" r="48" fill="none" stroke="#CFE3EE" stroke-opacity="0.35"/>
+<circle cx="1330" cy="118" r="55" fill="none" stroke="#CFE3EE" stroke-opacity="0.18"/>
+<circle cx="1330" cy="118" r="64" fill="none" stroke="#CFE3EE" stroke-opacity="0.1"/>
+
+<path d="M-20 300V268C60 256 120 262 200 252C280 242 340 258 420 262C520 268 580 256 680 262C780 268 860 246 960 250C1060 254 1130 240 1230 246C1320 251 1380 242 1460 250V300Z" fill="#12324A" stroke="#CFE3EE" stroke-opacity="0.3"/>
+<path d="M-20 300V268C60 256 120 262 200 252C280 242 340 258 420 262C520 268 580 256 680 262C780 268 860 246 960 250C1060 254 1130 240 1230 246C1320 251 1380 242 1460 250V300Z" fill="url(#hatch)" opacity="0.22"/>
+<path d="M-20 300V240C50 228 110 236 180 224C250 212 320 230 380 244C440 258 500 270 560 282L640 300Z" fill="#0C2539" stroke="#CFE3EE" stroke-opacity="0.38"/>
+<path d="M-20 300V240C50 228 110 236 180 224C250 212 320 230 380 244C440 258 500 270 560 282L640 300Z" fill="url(#hatch)" opacity="0.3"/>
+<path d="M860 300C930 284 990 268 1070 262C1150 256 1230 262 1300 256C1360 252 1410 256 1460 262V300Z" fill="#0C2539" stroke="#CFE3EE" stroke-opacity="0.38"/>
+<path d="M860 300C930 284 990 268 1070 262C1150 256 1230 262 1300 256C1360 252 1410 256 1460 262V300Z" fill="url(#hatch)" opacity="0.3"/>
+
+<rect x="-20" y="300" width="1480" height="170" fill="url(#sea)"/>
+<path d="M-20 300H1460" stroke="#CFE3EE" stroke-opacity="0.35"/>
+
+<g fill="none" stroke="#CFE3EE" stroke-linecap="round">
+<path class="wv" style="--len:366" d="M0 312H1440" stroke-opacity="0.16" stroke-dasharray="70 18 22 26 140 30 40 20"/>
+<path class="wv2" style="--len:380" d="M0 322H1440" stroke-opacity="0.14" stroke-dasharray="30 24 90 16 50 28 120 22"/>
+<path class="wv" style="--len:272" d="M0 338H1440" stroke-opacity="0.12" stroke-dasharray="110 20 36 30 60 16"/>
+<path class="wv2" style="--len:270" d="M0 356H1440" stroke-opacity="0.12" stroke-dasharray="50 22 130 18 24 26"/>
+<path d="M0 378H1440" stroke-opacity="0.1" stroke-dasharray="90 26 40 20 150 24"/>
+<path d="M0 402H1440" stroke-opacity="0.08" stroke-dasharray="60 30 100 22"/>
+<path d="M0 428H1440" stroke-opacity="0.06" stroke-dasharray="140 40 50 30"/>
+</g>
+
+<path d="M1300 312H1360M1306 320H1354M1312 328H1348M1318 337H1342M1322 347H1338M1325 358H1335" stroke="#DCEAF2" stroke-opacity="0.5" stroke-width="1.6" stroke-linecap="round"/>
+
+<path d="M-20 296H570L612 352H-20Z" fill="#091B2B"/>
+<path d="M-20 296H570" stroke="#CFE3EE" stroke-opacity="0.3"/>
+<path d="M-20 306H575M-20 317H583" stroke="#CFE3EE" stroke-opacity="0.08"/>
+
+<g opacity="0.55">
+<use href="#sC" x="-4" y="312"/><use href="#sA" x="40" y="312"/><use href="#sF" x="84" y="312"/><use href="#sB" x="128" y="312"/><use href="#sC" x="172" y="312"/><use href="#sG" x="216" y="312"/><use href="#sA" x="260" y="312"/><use href="#sF" x="304" y="312"/><use href="#sE" x="348" y="312"/><use href="#sC" x="392" y="312"/><use href="#sA" x="436" y="312"/><use href="#sB" x="480" y="312"/><use href="#sF" x="524" y="312"/>
+</g>
+<g>
+<use href="#sA" x="18" y="326"/><use href="#sE" x="62" y="326"/><use href="#sC" x="106" y="326"/><use href="#sD" x="150" y="326"/><use href="#sF" x="194" y="326"/><use href="#sB" x="238" y="326"/><use href="#sG" x="282" y="326"/><use href="#sC" x="326" y="326"/><use href="#sA" x="370" y="326"/><use href="#sD" x="414" y="326"/><use href="#sE" x="458" y="326"/><use href="#sF" x="502" y="326"/><use href="#sC" x="546" y="326"/>
+</g>
+
+<use href="#crane" transform="translate(150 322) scale(0.72)" opacity="0.65"/>
+<use href="#crane" transform="translate(330 326) scale(0.85)" opacity="0.82"/>
+<use href="#crane" transform="translate(520 330)"/>
+
+<path d="M-20 330H595L612 352H-20Z" fill="#0B2236"/>
+<path d="M-20 330H595L612 352H-20Z" fill="url(#hatch)" opacity="0.4"/>
+<path d="M-20 330H595" stroke="#CFE3EE" stroke-opacity="0.7"/>
+<path d="M30 331V351M110 331V351M190 331V351M270 331V351M350 331V351M430 331V351M510 331V351" stroke="#CFE3EE" stroke-opacity="0.25"/>
+<path d="M64 330v-6h8v6zM224 330v-6h8v6zM384 330v-6h8v6zM544 330v-6h8v6z" fill="#CFE3EE" fill-opacity="0.6"/>
+
+<g fill="none" stroke="#CFE3EE" stroke-linecap="round">
+<path d="M690 334C664 335 640 338 622 342" stroke-opacity="0.3" stroke-dasharray="14 8 6 8"/>
+<path d="M704 341C676 344 652 349 632 355" stroke-opacity="0.22" stroke-dasharray="10 8 4 8"/>
+<path d="M740 354H1210" stroke-opacity="0.28" stroke-dasharray="60 10 140 8 30 12 90 10"/>
+<path d="M760 362H1190" stroke-opacity="0.2" stroke-dasharray="40 14 100 12 60 10"/>
+<path d="M790 372H1160" stroke-opacity="0.14" stroke-dasharray="30 16 80 14 50 12"/>
+<path d="M830 384H1120" stroke-opacity="0.09" stroke-dasharray="20 18 60 16"/>
+</g>
+<path d="M726 352V372M738 352V366M750 352V360" stroke="#F5B56B" stroke-opacity="0.35" stroke-linecap="round"/>
+
+<g class="ship">
+<path d="M692 298H1198C1222 298 1240 288 1254 270L1234 330H714Z" fill="#0B2236" stroke="#CFE3EE" stroke-opacity="0.85" stroke-width="1.2" stroke-linejoin="round"/>
+<path d="M692 298H1198C1222 298 1240 288 1254 270L1234 330H714Z" fill="url(#hatch)" opacity="0.2"/>
+<path d="M714 330H1234L1227 345H723Z" fill="#B5502A" fill-opacity="0.9"/>
+<path d="M701 306H1238" stroke="#CFE3EE" stroke-opacity="0.35"/>
+<text x="905" y="322" font-family="IBM Plex Mono, monospace" font-size="8" letter-spacing="3" fill="#CFE3EE" fill-opacity="0.5">CARGOAGENTS.SI</text>
+
+<rect x="718" y="262" width="60" height="36" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="726" y="244" width="44" height="18" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="720" y="236" width="58" height="9" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<path d="M724 240.5H774" stroke="#F5B56B" stroke-width="3" stroke-dasharray="5 3"/>
+<path d="M724 252H766M724 270H772M724 281H772" stroke="#F5B56B" stroke-opacity="0.7" stroke-width="2" stroke-dasharray="3 5"/>
+<rect x="746" y="216" width="14" height="22" fill="#0E2A40" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<rect x="746" y="222" width="14" height="6" fill="#E8793A"/>
+<path d="M736 236V206M729 212H743" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<path d="M1212 298V280" stroke="#CFE3EE" stroke-opacity="0.8"/>
+<circle cx="1212" cy="279" r="1.6" fill="#EAF3F8"/>
+
+<use href="#sA" x="792" y="298"/><use href="#sB" x="834" y="298"/><use href="#sD" x="876" y="298"/><use href="#sA" x="918" y="298"/><use href="#sB" x="960" y="298"/><use href="#sD" x="1002" y="298"/><use href="#sG" x="1044" y="298"/><use href="#sC" x="1086" y="298"/><use href="#sE" x="1128" y="298"/>
+</g>
+
+<g class="gull" style="animation-duration:15s"><path d="M880 150q7-8 14 0q7-8 14 0" fill="none" stroke="#DCEAF2" stroke-width="1.4" stroke-linecap="round"/></g>
+<g class="gull" style="animation-duration:19s;animation-delay:-6s"><path d="M934 178q5-6 10 0q5-6 10 0" fill="none" stroke="#DCEAF2" stroke-width="1.2" stroke-linecap="round"/></g>
+<g class="gull" style="animation-duration:13s;animation-delay:-3s"><path d="M832 190q4-5 8 0q4-5 8 0" fill="none" stroke="#DCEAF2" stroke-width="1" stroke-linecap="round"/></g>
+
+<circle class="bl" cx="499" cy="103" r="1.9" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-1.3s" cx="680" cy="86" r="1.9" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-0.6s" cx="312" cy="133" r="1.7" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-1.9s" cx="466" cy="119" r="1.7" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-2.2s" cx="135" cy="159" r="1.5" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-0.3s" cx="265" cy="146" r="1.5" fill="#FF5A4A"/>
+<circle class="bl" style="animation-delay:-1s" cx="736" cy="205" r="1.8" fill="#FF5A4A"/>
+</svg>
+
+<div aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:160px;pointer-events:none;background:linear-gradient(180deg,rgba(7,19,31,0) 0%,rgba(7,19,31,0.92) 72%)"></div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 clamp(20px,4vw,40px) 26px">
+<div style="max-width:1280px;margin:0 auto;border-top:1px solid rgba(207,227,238,0.2);padding-top:18px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px 32px;font:400 12px/1.5 'IBM Plex Mono',monospace;letter-spacing:0.02em;color:#9DB5C5">
+<span>© 2026 Cargo Agents · [Registered company name, reg. no., VAT ID]</span>
+<span style="display:flex;flex-wrap:wrap;gap:8px 24px">
+<a class="sub" href="#">Privacy policy</a>
+<a class="sub" href="#">Terms of service</a>
+<a class="sub" href="#">Cookie settings</a>
+</span>
+</div>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1010}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

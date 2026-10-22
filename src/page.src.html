@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Cargo Agents</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
@@ -374,13 +375,13 @@ select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradie
       <div class="story-head"><h2 id="storyH">One container, followed from <em>port to port.</em></h2></div>
 
       <div class="story-globe">
-        <canvas class="globe" id="globe" role="img" aria-label="Example sea route from Shanghai to Rotterdam via Singapore, Colombo and Suez, drawn on a dotted globe"></canvas>
+        <canvas class="globe" id="globe" role="img" aria-label="Example sea route from Lagos to Jebel Ali via Cape Town, Mombasa and Salalah, drawn on a dotted globe"></canvas>
         <div class="hud" aria-hidden="true">
           <div><span class="k">Status</span><span class="v" id="hudStatus">Plotting the route</span></div>
-          <div><span class="k">Position</span><span class="v" id="hudPos">30.6°N 122.2°E</span></div>
+          <div><span class="k">Position</span><span class="v" id="hudPos">6.4°N 3.4°E</span></div>
           <div><span class="k">Day</span><span class="v" id="hudDay">0 / 31</span></div>
         </div>
-        <p class="globe-cap">Example sailing. Shanghai to Rotterdam. Not to scale.</p>
+        <p class="globe-cap">Example sailing. Lagos to Jebel Ali. Not to scale.</p>
       </div>
 
       <ol class="steps" id="steps">
@@ -689,9 +690,9 @@ select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradie
   var clamp01 = function (t) { return t < 0 ? 0 : t > 1 ? 1 : t; };
   var smooth = function (t) { t = clamp01(t); return t * t * (3 - 2 * t); };
   var LAND = '{{LANDMASK}}';
-  var WP = [[30.6,122.2,'SHANGHAI'],[25.0,120.0],[21.5,117.5],[13.0,111.5],[6.0,106.5],[1.25,104.0,'SINGAPORE'],[1.4,103.3],[2.8,101.0],[5.5,97.5],[6.0,94.0],[5.6,86.0],[5.9,80.6],[6.9,79.8,'COLOMBO'],[8.5,70.0],[11.5,55.0],[12.3,46.0],[12.6,43.3],[20.0,38.2],[27.5,34.0],[29.9,32.55,'SUEZ'],[31.3,32.3],[33.5,28.0],[35.6,19.0],[36.5,11.0],[37.2,4.0],[36.1,-2.2],[35.95,-5.4],[36.2,-8.2],[37.0,-9.4],[42.5,-10.0],[47.5,-7.0],[49.7,-2.5],[50.4,0.5],[51.1,1.6],[51.6,3.0],[51.95,4.05,'ROTTERDAM']];
-  var OVERVIEW = { lat: 24, lon: 64, k: 0.86 };
-  var DAYS = 31;
+  var WP = [[6.42,3.40,'LAGOS'],[4.0,3.0],[0.0,4.0],[-6.0,9.0],[-12.0,11.5],[-18.0,10.5],[-26.0,13.0],[-32.0,16.0],[-33.9,18.4,'CAPE TOWN'],[-35.2,19.5],[-35.3,20.5],[-35.0,25.0],[-33.0,29.5],[-30.0,32.0],[-25.0,35.8],[-20.0,37.5],[-15.0,41.5],[-10.0,41.5],[-4.06,39.67,'MOMBASA'],[0.0,44.0],[5.0,50.0],[10.0,53.0],[14.0,55.0],[16.94,54.0,'SALALAH'],[17.5,57.0],[20.0,59.5],[22.8,60.5],[24.5,58.0],[26.4,56.6],[25.6,55.0],[25.01,55.06,'JEBEL ALI']];
+  var OVERVIEW = { lat: -5, lon: 30, k: 0.86 };
+  var DAYS = 24;
 
   function llv(lat, lon) { var a = lat * D2R, b = lon * D2R, c = Math.cos(a); return [c * Math.cos(b), c * Math.sin(b), Math.sin(a)]; }
   function buildRoute() {
@@ -878,7 +879,7 @@ select.in{appearance:none;-webkit-appearance:none;background-image:linear-gradie
   function finalState() { return { u: 1, b: 1, c: 1, s: 1, r: 1, lat: OVERVIEW.lat, lon: OVERVIEW.lon, k: OVERVIEW.k, spin: 0, stage: 4 }; }
 
   var steps = $$('.step'), story = $('#story');
-  var STATUS = ['Plotting the route', 'Space booked', 'Export cleared', 'At sea', 'Released at Rotterdam'];
+  var STATUS = ['Plotting the route', 'Space booked', 'Export cleared', 'At sea', 'Released at Jebel Ali'];
   function setText(el, t) { if (el.textContent !== t) el.textContent = t; }
   function fmtPos(pt) { return Math.abs(pt.lat).toFixed(1) + '°' + (pt.lat >= 0 ? 'N' : 'S') + ' ' + Math.abs(pt.lon).toFixed(1) + '°' + (pt.lon >= 0 ? 'E' : 'W'); }
   function render(p, st) {

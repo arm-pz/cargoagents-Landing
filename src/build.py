@@ -1,8 +1,10 @@
 import math, re, sys
 
-P = "/tmp/claude-0/-home-claude/78095222-ebea-5708-9122-e405feeca108/scratchpad/"
-proj = P + "cargo-footer/project/"
-tpl = open(P + "site-test/page.src.html", encoding="utf-8").read()
+import os
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + "/"
+proj = ROOT + "design/"
+tpl = open(ROOT + "src/page.src.html", encoding="utf-8").read()
 
 
 def ns(svg, prefix):
@@ -233,9 +235,9 @@ rf += '<path d="M0 232H480" stroke="%s" stroke-opacity="0.0"/>' % INK
 art_reefer = plate(rf)
 
 out = tpl
-out = out.replace("{{LANDMASK}}", open(P + "geo-src/landmask.b64").read().strip())
+out = out.replace("{{LANDMASK}}", open(ROOT + "src/landmask.b64").read().strip())
 out = out.replace("{{HERO_SVG}}", hero).replace("{{FOOT_SVG}}", foot).replace("{{GRATICULE}}", graticule)
 out = out.replace("{{ART_FCL}}", art_fcl).replace("{{ART_LCL}}", art_lcl).replace("{{ART_REEFER}}", art_reefer)
 assert "{{" not in out, re.findall(r"\{\{[^}]+\}\}", out)
-open(P + "site-test/site.html", "w", encoding="utf-8").write(out)
-print("site.html", len(out), "bytes")
+open(ROOT + "index.html", "w", encoding="utf-8").write(out)
+print("index.html", len(out), "bytes")
